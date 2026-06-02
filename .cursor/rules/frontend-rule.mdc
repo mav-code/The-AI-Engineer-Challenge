@@ -11,3 +11,4 @@ alwaysApply: false
 - You should use Next.js as it works best with Vercel. 
 - This frontend will ultimately be deployed on Vercel, but it should be possible to test locally. 
 - Always provide users with a way to run the created UI once you have created it.
+- The project's color scheme will be a gradient from orange to yellow to white, with orange predominant and used for the background elements, white used sparingly for the most emphasized elements, and yellow intermediate to them. Additionally, a small amount of light periwinkle blue may be used for accents with or near the white elements.

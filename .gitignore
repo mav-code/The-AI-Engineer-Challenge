@@ -1,6 +1,14 @@
 # Project Specific
 uv.lock
 
+# Next.js
+frontend/.next/
+frontend/next-env.d.ts
+frontend/node_modules/
+
+# macOS metadata
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
