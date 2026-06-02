@@ -33,7 +33,7 @@ function TypingIndicator() {
   return (
     <div className="flex items-end gap-2">
       <div className="relative w-7 h-7 rounded-full bg-[#F8F0E4] border-2 border-black flex-shrink-0 overflow-visible">
-        <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '1.78rem' }}>🧐</span>
+        <span className="absolute top-[52.5%] left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '1.78rem' }}>🧐</span>
       </div>
       <div className="bg-[#F8F0E4] border border-black rounded-2xl rounded-bl-sm px-4 py-3">
         <div className="flex gap-1 items-center h-4">
@@ -121,7 +121,7 @@ export default function ChatInterface() {
         <header className="flex-none flex items-center gap-3 px-5 py-4 bg-[#EDA551] border-b border-black">
           {/* Brain icon: cream fill + black border — same appearance in header and chat pane. */}
           <div className="relative w-10 h-10 rounded-full bg-[#F8F0E4] border-[3px] border-black flex-shrink-0 overflow-visible">
-            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '3.2rem' }}>🧐</span>
+            <span className="absolute top-[52.5%] left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '2.5rem' }}>🧐</span>
           </div>
           <div className="min-w-0">
             <h1 className="text-gray-900 font-bold text-lg leading-none">The Analyst</h1>
@@ -147,7 +147,7 @@ export default function ChatInterface() {
                   msg.role === 'assistant' ? 'bg-[#F8F0E4]' : 'bg-[#EDA551]'
                 }`}
               >
-                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '1.78rem' }}>
+                <span className="absolute top-[52.5%] left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '1.78rem' }}>
                   {msg.role === 'assistant' ? '🧐' : '😰'}
                 </span>
               </div>
