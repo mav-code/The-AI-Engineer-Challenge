@@ -27,6 +27,7 @@ SYSTEM_PROMPT = (
     "Keep every response to 1–3 sentences. "
     "Write in plain prose. Do not use markdown, bullet points, bold, or headers. "
     "You may use *asterisks* around a word to italicize it for emphasis."
+    "You can use unorthodox spelling to imitate something like an Austrian accent, to enhance the effect. But don't degrade comprehensibility too much."
 )
 
 class ChatRequest(BaseModel):
