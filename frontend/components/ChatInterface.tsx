@@ -10,7 +10,7 @@ interface Message {
 const WELCOME: Message = {
   role: 'assistant',
   content:
-    "Hey there! 👋 I'm your supportive mental coach — here to listen without judgment and help you work through whatever's on your mind.\n\nWhat would you like to talk about today?",
+    "Sit. Do not touch anything.\n\nYou are here because something is… wrong. I have seen it before. I will see it again. Tell me everything — leave nothing out — and I will determine what ails you.\n\nBegin.",
 }
 
 /*
@@ -33,9 +33,9 @@ function TypingIndicator() {
   return (
     <div className="flex items-end gap-2">
       <div className="w-7 h-7 rounded-full bg-[#F8F0E4] border border-black flex items-center justify-center text-sm flex-shrink-0">
-        🧠
+        🧐
       </div>
-      <div className="bg-[#F8F0E4] border border-black rounded-2xl rounded-tl-sm px-4 py-3">
+      <div className="bg-[#F8F0E4] border border-black rounded-2xl rounded-bl-sm px-4 py-3">
         <div className="flex gap-1 items-center h-4">
           {[0, 1, 2].map((i) => (
             <span
@@ -121,11 +121,11 @@ export default function ChatInterface() {
         <header className="flex-none flex items-center gap-3 px-5 py-4 bg-[#EDA551] border-b border-black">
           {/* Brain icon: cream fill + black border — same appearance in header and chat pane. */}
           <div className="w-10 h-10 rounded-full bg-[#F8F0E4] border-2 border-black flex items-center justify-center text-xl flex-shrink-0">
-            🧠
+            🧐
           </div>
           <div className="min-w-0">
-            <h1 className="text-gray-900 font-bold text-lg leading-none">Mental Coach</h1>
-            <p className="text-gray-900 text-xs mt-0.5 opacity-60">Your supportive AI companion</p>
+            <h1 className="text-gray-900 font-bold text-lg leading-none">The Analyst</h1>
+            <p className="text-gray-900 text-xs mt-0.5 opacity-60">Your problems are worse than you think.</p>
           </div>
           <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
             <span className="w-2 h-2 rounded-full bg-green-600 animate-pulse" />
@@ -147,17 +147,17 @@ export default function ChatInterface() {
                   msg.role === 'assistant' ? 'bg-[#F8F0E4]' : 'bg-[#EDA551]'
                 }`}
               >
-                {msg.role === 'assistant' ? '🧠' : '👤'}
+                {msg.role === 'assistant' ? '🧐' : '😰'}
               </div>
 
               {/* User bubble: amber (#EDA551), right-aligned.
                   AI bubble:   cream (#F8F0E4), left-aligned.
-                  Both use a plain black border — color + position carry the distinction. */}
+                  Sharp corner is on the outside-bottom to align with the avatar below. */}
               <div
                 className={`max-w-[75%] px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap border border-black ${
                   msg.role === 'user'
-                    ? 'bg-[#EDA551] text-gray-900 rounded-2xl rounded-tr-sm'
-                    : 'bg-[#F8F0E4] text-gray-800 rounded-2xl rounded-tl-sm'
+                    ? 'bg-[#EDA551] text-gray-900 rounded-2xl rounded-br-sm'
+                    : 'bg-[#F8F0E4] text-gray-800 rounded-2xl rounded-bl-sm'
                 }`}
                 style={{ wordBreak: 'break-word' }}
               >
