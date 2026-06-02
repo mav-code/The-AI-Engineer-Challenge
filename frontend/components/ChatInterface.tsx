@@ -17,7 +17,7 @@ const WELCOME: Message = {
  * Four-step palette — every touching pair of surfaces is exactly ±1 step.
  *
  *   Step 1  #D45F2A  deep burnt orange  page background (card sides on wide screens)
- *   Step 2  #EDA551  warm amber         header, user bubbles, all avatars, brain icon
+ *   Step 2  #EDA551  warm amber         header, user bubbles, all avatars
  *   Step 3  #F9D074  warm yellow        message area, send button
  *   Step 4  #F8F0E4  warm cream         AI bubbles, input footer, textarea
  *   Accent  #E2C3DA  dusty mauve        decorative borders and focus rings
@@ -29,12 +29,38 @@ const WELCOME: Message = {
  *                                                             ↔ send btn (3)
  */
 
+// Twemoji SVGs give consistent geometry on every platform (no system-font variation).
+// Codepoints: 🧐 U+1F9D0, 😰 U+1F630.
+const ANALYST_SVG = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f9d0.svg'
+const USER_SVG    = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f630.svg'
+
+// Twemoji face circles span ~33 of the 36-unit viewBox (ratio ≈ 0.917).
+// Sizing the image to 1/0.917 ≈ 109% of the container makes the face
+// fill the circle exactly; the monocle chain and sweat bead escape via overflow-visible.
+const EMOJI_SCALE = '109%'
+
+function Avatar({ src, alt, className }: { src: string; alt: string; className: string }) {
+  return (
+    <div className={className}>
+      <img
+        src={src}
+        alt={alt}
+        draggable={false}
+        className="absolute pointer-events-none"
+        style={{ width: EMOJI_SCALE, height: EMOJI_SCALE, top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+      />
+    </div>
+  )
+}
+
 function TypingIndicator() {
   return (
     <div className="flex items-end gap-2">
-      <div className="relative w-7 h-7 rounded-full bg-[#F8F0E4] border-2 border-black flex-shrink-0 overflow-visible">
-        <span className="absolute top-[52.5%] left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '1.78rem' }}>🧐</span>
-      </div>
+      <Avatar
+        src={ANALYST_SVG}
+        alt=""
+        className="relative w-7 h-7 rounded-full bg-[#F8F0E4] border-2 border-black flex-shrink-0 overflow-visible"
+      />
       <div className="bg-[#F8F0E4] border border-black rounded-2xl rounded-bl-sm px-4 py-3">
         <div className="flex gap-1 items-center h-4">
           {[0, 1, 2].map((i) => (
@@ -119,10 +145,11 @@ export default function ChatInterface() {
 
         {/* Step 2 — amber — one step from page bg (step 1) and message area (step 3). */}
         <header className="flex-none flex items-center gap-3 px-5 py-4 bg-[#EDA551] border-b border-black">
-          {/* Brain icon: cream fill + black border — same appearance in header and chat pane. */}
-          <div className="relative w-10 h-10 rounded-full bg-[#F8F0E4] border-[3px] border-black flex-shrink-0 overflow-visible">
-            <span className="absolute top-[52.5%] left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '2.5rem' }}>🧐</span>
-          </div>
+          <Avatar
+            src={ANALYST_SVG}
+            alt="The Analyst"
+            className="relative w-10 h-10 rounded-full bg-[#F8F0E4] border-[3px] border-black flex-shrink-0 overflow-visible"
+          />
           <div className="min-w-0">
             <h1 className="text-gray-900 font-bold text-lg leading-none">The Analyst</h1>
             <p className="text-gray-900 text-xs mt-0.5 opacity-60">Your problems are worse than you think.</p>
@@ -140,17 +167,13 @@ export default function ChatInterface() {
               key={i}
               className={`flex items-end gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
             >
-              {/* AI avatar:   cream (#F8F0E4) — matches the header brain icon exactly.
-                  User avatar: amber (#EDA551) — matches the user bubble. */}
-              <div
+              <Avatar
+                src={msg.role === 'assistant' ? ANALYST_SVG : USER_SVG}
+                alt={msg.role === 'assistant' ? 'The Analyst' : 'You'}
                 className={`relative w-7 h-7 rounded-full flex-shrink-0 border-2 border-black overflow-visible ${
                   msg.role === 'assistant' ? 'bg-[#F8F0E4]' : 'bg-[#EDA551]'
                 }`}
-              >
-                <span className="absolute top-[52.5%] left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '1.78rem' }}>
-                  {msg.role === 'assistant' ? '🧐' : '😰'}
-                </span>
-              </div>
+              />
 
               {/* User bubble: amber (#EDA551), right-aligned.
                   AI bubble:   cream (#F8F0E4), left-aligned.
