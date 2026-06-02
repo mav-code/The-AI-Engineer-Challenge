@@ -147,7 +147,7 @@ export default function ChatInterface() {
                   msg.role === 'assistant' ? 'bg-[#F8F0E4]' : 'bg-[#EDA551]'
                 }`}
               >
-                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '2.25rem' }}>
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '1.78rem' }}>
                   {msg.role === 'assistant' ? '🧐' : '😰'}
                 </span>
               </div>
