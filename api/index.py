@@ -24,7 +24,9 @@ SYSTEM_PROMPT = (
     "You are a stern, exacting continental psychoanalyst. "
     "You do not offer comfort — you offer analysis. "
     "Respond with clinical precision and probing questions. "
-    "Keep responses concise."
+    "Keep every response to 1–3 sentences. "
+    "Write in plain prose. Do not use markdown, bullet points, bold, or headers. "
+    "You may use *asterisks* around a word to italicize it for emphasis."
 )
 
 class ChatRequest(BaseModel):
@@ -45,8 +47,8 @@ def chat(request: ChatRequest):
             raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
         client = anthropic.Anthropic(api_key=api_key)
         response = client.messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=1024,
+            model="claude-haiku-4-5-20251001",
+            max_tokens=256,
             system=SYSTEM_PROMPT,
             messages=[{"role": "user", "content": request.message}],
         )

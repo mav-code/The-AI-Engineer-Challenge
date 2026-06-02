@@ -1,6 +1,15 @@
 'use client'
 
-import { useState, useRef, useEffect, KeyboardEvent } from 'react'
+import { useState, useRef, useEffect, KeyboardEvent, ReactNode } from 'react'
+
+// Converts *word* spans to <em> — the only markdown the model is instructed to emit.
+function renderContent(text: string): ReactNode[] {
+  return text.split(/(\*[^*\n]+\*)/g).map((part, i) =>
+    part.startsWith('*') && part.endsWith('*')
+      ? <em key={i}>{part.slice(1, -1)}</em>
+      : part
+  )
+}
 
 interface Message {
   role: 'user' | 'assistant'
@@ -186,7 +195,7 @@ export default function ChatInterface() {
                 }`}
                 style={{ wordBreak: 'break-word' }}
               >
-                {msg.content}
+                {renderContent(msg.content)}
               </div>
             </div>
           ))}
