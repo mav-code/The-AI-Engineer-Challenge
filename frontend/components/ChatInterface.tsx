@@ -32,8 +32,8 @@ const WELCOME: Message = {
 function TypingIndicator() {
   return (
     <div className="flex items-end gap-2">
-      <div className="relative w-7 h-7 rounded-full bg-[#F8F0E4] border border-black flex-shrink-0 overflow-visible">
-        <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '2.25rem' }}>🧐</span>
+      <div className="relative w-7 h-7 rounded-full bg-[#F8F0E4] border-2 border-black flex-shrink-0 overflow-visible">
+        <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '1.78rem' }}>🧐</span>
       </div>
       <div className="bg-[#F8F0E4] border border-black rounded-2xl rounded-bl-sm px-4 py-3">
         <div className="flex gap-1 items-center h-4">
@@ -120,7 +120,7 @@ export default function ChatInterface() {
         {/* Step 2 — amber — one step from page bg (step 1) and message area (step 3). */}
         <header className="flex-none flex items-center gap-3 px-5 py-4 bg-[#EDA551] border-b border-black">
           {/* Brain icon: cream fill + black border — same appearance in header and chat pane. */}
-          <div className="relative w-10 h-10 rounded-full bg-[#F8F0E4] border-2 border-black flex-shrink-0 overflow-visible">
+          <div className="relative w-10 h-10 rounded-full bg-[#F8F0E4] border-[3px] border-black flex-shrink-0 overflow-visible">
             <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none select-none" style={{ fontSize: '3.2rem' }}>🧐</span>
           </div>
           <div className="min-w-0">
@@ -143,7 +143,7 @@ export default function ChatInterface() {
               {/* AI avatar:   cream (#F8F0E4) — matches the header brain icon exactly.
                   User avatar: amber (#EDA551) — matches the user bubble. */}
               <div
-                className={`relative w-7 h-7 rounded-full flex-shrink-0 border border-black overflow-visible ${
+                className={`relative w-7 h-7 rounded-full flex-shrink-0 border-2 border-black overflow-visible ${
                   msg.role === 'assistant' ? 'bg-[#F8F0E4]' : 'bg-[#EDA551]'
                 }`}
               >
