@@ -1,3 +1,4 @@
 fastapi
-openai
+anthropic
+# openai
 python-dotenv
