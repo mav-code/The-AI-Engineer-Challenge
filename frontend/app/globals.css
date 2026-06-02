@@ -2,11 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Hide the textarea scrollbar in all browsers; content still scrolls via keyboard/wheel. */
-textarea {
+/* Hide scrollbars in all browsers; content still scrolls via keyboard/wheel. */
+textarea, main {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-textarea::-webkit-scrollbar {
+textarea::-webkit-scrollbar, main::-webkit-scrollbar {
   display: none;
 }
