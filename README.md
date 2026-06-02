@@ -353,7 +353,7 @@ You ask this practical question as though the answer exists outside yourself, ye
 What are some limitations of your application?
 
 **Your Answer:**  
-Well, everything -- it's not a real analyst, it's 
+Well, everything -- it's not a real analyst, we've told it to be brief and downgraded it to Haiku, it doesn't have proper memory, it doesn't learn, it's trapped in a box in a box in a box... It can't do anything, really, because of its inherent limitations, because of our nonexistant infrastructure, and because we've given it an impossible job and a funny accent.
 
 ---
 
@@ -370,10 +370,14 @@ Then rerun your vibe check and document:
 **Adjustments Made:**  
 - I've switched to Claude, mainly because I have some credits there; all the responses above are from the Claude version. I can switch between the two by flipping a couple of comments in `api/index.py` and `api/requirements.txt`. 
 - After the first test, I switched it over to Haiku and instructed it not to use md styling in its responses.
+- After all the tests, I instructed it to use unorthodox spelling to imitate an Austrian accent, to enhance the effect.
 - I've also CNAME'd the app to be accessible on a subdomain I own (coach.mavi.party); but it's still hosted on Vercel.
 
 **Results:**  
-<!-- What improved? What didn’t? -->
+- Haiku is laconic, which fits the use-case better than the essay responses.
+- The styling-nixing instructions improved the conversational effect, and are preferable even to properly rendering markdown.
+- The Austrian accent is funny.
+- Works great on my own domain
 
 ---
 
