@@ -4,17 +4,21 @@
 </p>
 
 
-## <h1 align="center" id="heading"> 👋 Welcome to the AI Engineer Challenge</h1>
+## <h1 align="center" id="heading"> 🧐 The Analyst — AI Engineer Challenge</h1>
 
-## 🤖 Your First Vibe Coding LLM Application
+## 🛋️ A Vibe-Coded LLM Application
 
 > If you are a novice, and need a bit more help to get your dev environment off the ground, check out this [Setup Guide](docs/GIT_SETUP.md). This guide will walk you through the 'git' setup you need to get started.
 
 > For additional context on LLM development environments and API key setup, you can also check out our [Interactive Dev Environment for LLM Development](https://github.com/AI-Maker-Space/Interactive-Dev-Environment-for-AI-Engineers).
 
-In this repository, we'll walk you through the steps to create a LLM (Large Language Model) powered application with a vibe-coded frontend!
+**The Analyst** is an LLM-powered chat application featuring a stern, sinister continental psychoanalyst who is deeply skeptical of your mental health. Built with a Next.js 14 frontend, a FastAPI + OpenAI backend, and deployed on Vercel as a monorepo.
 
-Are you ready? Let's get started!
+> *"Sit. Do not touch anything. You are here because something is… wrong."*
+
+The repo walks through building and shipping this kind of application from scratch. Follow the steps below!
+
+Are you ready? The Analyst is waiting. Let's get started!
 
 <details>
   <summary>🖥️ Accessing "gpt-4.1-mini" (ChatGPT) like a developer</summary>

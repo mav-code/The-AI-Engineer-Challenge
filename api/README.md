@@ -1,48 +1,31 @@
-# OpenAI Chat API Backend
+# The Analyst — Backend API
 
-This is a FastAPI-based backend service that provides a chat interface using OpenAI's API. The service acts as a supportive mental coach, helping users with stress, motivation, habits, and confidence.
+FastAPI backend that powers The Analyst chat interface. Accepts a user message, passes it to OpenAI with the system prompt, and returns the reply. Deployed as a Python serverless function on Vercel.
 
 ## Prerequisites
 
 - [`uv`](https://github.com/astral-sh/uv) package manager (`pip install uv`)
-- `uv` will provision Python 3.12 automatically for this project, so no separate interpreter installation is required
-- An OpenAI API key available as the `OPENAI_API_KEY` environment variable when you run the server
+- `uv` provisions Python 3.12 automatically — no separate interpreter needed
+- An OpenAI API key in the `OPENAI_API_KEY` environment variable
 
 ## Setup
 
-All commands below assume you are running them from the repository root.
-
-1. Install dependencies into a local virtual environment managed by `uv`:
+All commands run from the **repository root**.
 
 ```bash
 uv sync
 ```
 
-2. (Optional) Activate the virtual environment if you prefer to run commands manually:
-
-```bash
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-```
-
-`uv` will create the `.venv` directory automatically on first sync and download Python 3.12 if it's not already available.
+This creates `.venv/` and fetches Python 3.12 if it isn't already available.
 
 ## Running the Server
 
-Start the FastAPI app with the dependencies managed by `uv`:
-
 ```bash
+export OPENAI_API_KEY=sk-your-key-here
 uv run uvicorn api.index:app --reload
 ```
 
-This runs the app with `uvicorn` on `http://localhost:8000` with auto-reload enabled for development. The server will automatically restart when you make changes to the code.
-
-**Note:** Make sure the `OPENAI_API_KEY` environment variable is set in your shell before launching the server. You can set it with:
-
-```bash
-export OPENAI_API_KEY=sk-your-key-here
-```
-
-If you encounter an "Address already in use" error, you may need to kill existing processes on port 8000:
+Server runs at `http://localhost:8000` with auto-reload. If port 8000 is already taken:
 
 ```bash
 lsof -ti:8000 | xargs kill -9
@@ -50,73 +33,48 @@ lsof -ti:8000 | xargs kill -9
 
 ## API Endpoints
 
-### Chat Endpoint
-- **URL**: `/api/chat`
-- **Method**: POST
-- **Request Body**:
+### `POST /api/chat`
+
+Send a user message, receive the analyst's reply.
+
+**Request:**
 ```json
-{
-    "message": "string"
-}
-```
-- **Response**: JSON object with the AI's reply:
-```json
-{
-    "reply": "string"
-}
+{ "message": "I've been feeling very anxious lately." }
 ```
 
-The chat endpoint uses OpenAI's GPT-5 model with a supportive mental coach system prompt to provide helpful responses.
+**Response:**
+```json
+{ "reply": "Anxious. Yes. That is... expected. Tell me more about your mother." }
+```
 
-### Root Endpoint
-- **URL**: `/`
-- **Method**: GET
-- **Response**: `{"status": "ok"}`
+### `GET /api/health`
+```json
+{ "status": "ok" }
+```
 
-### Health Check
-- **URL**: `/api/health`
-- **Method**: GET
-- **Response**: `{"status": "ok"}`
+### `GET /`
+```json
+{ "status": "ok" }
+```
 
-## API Documentation
+## System Prompt
 
-Once the server is running, you can access the interactive API documentation at:
+The backend currently uses the system prompt `"You are a supportive mental coach."` The frontend presents a stern psychoanalyst persona ("The Analyst"), but the backend system prompt has not yet been updated to match. Aligning them is a pending improvement.
+
+## Interactive API Docs
+
+With the server running:
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
-## CORS Configuration
-
-The API is configured to accept requests from any origin (`*`). This can be modified in the `index.py` file if you need to restrict access to specific domains.
-
-## Error Handling
-
-The API includes basic error handling for:
-- Invalid API keys
-- OpenAI API errors
-- General server errors
-
-All errors will return a 500 status code with an error message.
-
-## Testing the API
-
-Once your server is running, you can test the chat endpoint using curl:
+## Testing with curl
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/chat \
   -H "Content-Type: application/json" \
-  -d '{"message": "Hello"}'
+  -d '{"message": "I have been having troubling dreams."}'
 ```
 
-You should receive a JSON response with the AI's reply:
+## CORS
 
-```json
-{
-  "reply": "Hi! It's good to hear from you. What's on your mind today?..."
-}
-```
-
-You can also test the health check endpoint:
-
-```bash
-curl http://127.0.0.1:8000/api/health
-```
+Configured to accept requests from any origin (`*`). Restrict in `index.py` for production if needed.
