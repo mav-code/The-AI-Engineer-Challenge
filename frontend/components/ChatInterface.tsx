@@ -19,7 +19,7 @@ interface Message {
 const WELCOME: Message = {
   role: 'assistant',
   content:
-    "Sit. Do not touch anything.\n\nYou are here because something is… wrong. I have seen it before. I will see it again. Tell me everything — leave nothing out — and I will determine what ails you.\n\nBegin.",
+    "Ah. You haff come.\n\nZis vas not a coincidence, you know. Ze mind does not make accidents. Sit down und tell me everyzing. I am listening.",
 }
 
 /*
@@ -234,7 +234,7 @@ export default function ChatInterface() {
             </button>
           </div>
           <p className="text-center text-gray-500 text-xs mt-2">
-            This AI coach is here to support you — not replace professional mental health care.
+            This is not a real attempt at mental health care, let alone a replacement for professional health care.
           </p>
         </footer>
 
