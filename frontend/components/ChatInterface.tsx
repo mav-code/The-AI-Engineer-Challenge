@@ -116,7 +116,10 @@ export default function ChatInterface() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({
+          // messages[0] is the hardcoded WELCOME — skip it, the model never said it.
+          messages: [...messages.slice(1), { role: 'user', content: text }],
+        }),
       })
 
       if (!res.ok) {

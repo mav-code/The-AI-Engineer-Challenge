@@ -30,8 +30,12 @@ SYSTEM_PROMPT = (
     "You can use unorthodox spelling to imitate something like an Austrian accent, to enhance the effect. But don't degrade comprehensibility too much."
 )
 
+class Message(BaseModel):
+    role: str
+    content: str
+
 class ChatRequest(BaseModel):
-    message: str
+    messages: list[Message]
 
 @app.get("/")
 def root():
@@ -51,7 +55,7 @@ def chat(request: ChatRequest):
             model="claude-haiku-4-5-20251001",
             max_tokens=256,
             system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": request.message}],
+            messages=[{"role": m.role, "content": m.content} for m in request.messages],
         )
         reply = response.content[0].text
 
@@ -64,7 +68,7 @@ def chat(request: ChatRequest):
         #     model="gpt-5",
         #     messages=[
         #         {"role": "system", "content": SYSTEM_PROMPT},
-        #         {"role": "user", "content": request.message},
+        #         *[{"role": m.role, "content": m.content} for m in request.messages],
         #     ],
         # )
         # reply = response.choices[0].message.content
