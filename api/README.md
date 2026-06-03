@@ -1,12 +1,12 @@
 # The Analyst — Backend API
 
-FastAPI backend that powers The Analyst chat interface. Accepts a user message, passes it to OpenAI with the system prompt, and returns the reply. Deployed as a Python serverless function on Vercel.
+FastAPI backend that powers The Analyst chat interface. Accepts a user message, passes it to Claude with the system prompt, and returns the reply. Deployed as a Python serverless function on Vercel.
 
 ## Prerequisites
 
 - [`uv`](https://github.com/astral-sh/uv) package manager (`pip install uv`)
 - `uv` provisions Python 3.12 automatically — no separate interpreter needed
-- An OpenAI API key in the `OPENAI_API_KEY` environment variable
+- An Anthropic API key in the `ANTHROPIC_API_KEY` environment variable
 
 ## Setup
 
@@ -21,7 +21,7 @@ This creates `.venv/` and fetches Python 3.12 if it isn't already available.
 ## Running the Server
 
 ```bash
-export OPENAI_API_KEY=sk-your-key-here
+export ANTHROPIC_API_KEY=sk-your-key-here
 uv run uvicorn api.index:app --reload
 ```
 
@@ -56,10 +56,6 @@ Send a user message, receive the analyst's reply.
 ```json
 { "status": "ok" }
 ```
-
-## System Prompt
-
-The backend currently uses the system prompt `"You are a supportive mental coach."` The frontend presents a stern psychoanalyst persona ("The Analyst"), but the backend system prompt has not yet been updated to match. Aligning them is a pending improvement.
 
 ## Interactive API Docs
 
