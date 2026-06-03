@@ -41,6 +41,10 @@ class ChatRequest(BaseModel):
 def root():
     return {"status": "ok"}
 
+@app.get("/api/health")
+def health():
+    return {"status": "ok"}
+
 @app.post("/api/chat")
 def chat(request: ChatRequest):
     try:

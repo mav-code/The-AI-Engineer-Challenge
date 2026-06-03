@@ -89,8 +89,15 @@ export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([WELCOME])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking')
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    fetch('/api/health')
+      .then(r => setStatus(r.ok ? 'online' : 'offline'))
+      .catch(() => setStatus('offline'))
+  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -166,8 +173,14 @@ export default function ChatInterface() {
             <p className="text-gray-900 text-xs mt-0.5 opacity-60">Your problems are worse than you think.</p>
           </div>
           <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
-            <span className="w-2 h-2 rounded-full bg-green-600 animate-pulse" />
-            <span className="text-gray-900 text-xs opacity-60">Online</span>
+            <span className={`w-2 h-2 rounded-full ${
+              status === 'online'   ? 'bg-green-600 animate-pulse' :
+              status === 'offline'  ? 'bg-red-600' :
+                                      'bg-gray-400 animate-pulse'
+            }`} />
+            <span className="text-gray-900 text-xs opacity-60">
+              {status === 'online' ? 'Online' : status === 'offline' ? 'Offline' : 'Checking…'}
+            </span>
           </div>
         </header>
 
