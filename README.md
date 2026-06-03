@@ -8,8 +8,6 @@
 
 ## 🛋️ A Vibe-Coded LLM Application
 
-> If you are a novice, and need a bit more help to get your dev environment off the ground, check out this [Setup Guide](docs/GIT_SETUP.md). This guide will walk you through the 'git' setup you need to get started.
-
 > For additional context on LLM development environments and API key setup, you can also check out our [Interactive Dev Environment for LLM Development](https://github.com/AI-Maker-Space/Interactive-Dev-Environment-for-AI-Engineers).
 
 **The Analyst** is an LLM-powered chat application featuring a stern, sinister continental psychoanalyst who is deeply skeptical of your mental health. Built with a Next.js 14 frontend, a FastAPI + OpenAI backend, and deployed on Vercel as a monorepo.
@@ -74,7 +72,6 @@ Got everything in place? Let's move on!
      git branch
      ```
 
-     <!-- > Need more help with git? Check out our [Detailed Git Setup Guide](docs/GIT_SETUP.md) for a comprehensive walkthrough of git configuration and best practices. -->
 
 3. Open the freshly cloned repository inside Cursor!
 
@@ -370,7 +367,7 @@ Then rerun your vibe check and document:
 **Adjustments Made:**  
 - I've switched to Claude, mainly because I have some credits there; all the responses above are from the Claude version. I can switch between the two by flipping a couple of comments in `api/index.py` and `api/requirements.txt`. 
 - After the first test, I switched it over to Haiku and instructed it not to use md styling in its responses.
-- After all the tests, I instructed it to use unorthodox spelling to imitate an Austrian accent, to enhance the effect. Also updated the welcome message and footer to match.
+- After all the tests, I instructed it to use unorthodox spelling to imitate an Austrian accent, to enhance the effect. Also updated all hardcoded text to match theme.
 - Implemented sending the chat history as an array to the backend, so that the conversation can build and be self-referential. The Analyst now has a memory.
 - Added "Checking" and "Offline" indicators to go with the "Online" one. App pings the backend for status on mount
 - I've also CNAME'd the app to be accessible on a subdomain I own (coach.mavi.party); but it's still hosted on Vercel.
