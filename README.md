@@ -370,7 +370,7 @@ Then rerun your vibe check and document:
 **Adjustments Made:**  
 - I've switched to Claude, mainly because I have some credits there; all the responses above are from the Claude version. I can switch between the two by flipping a couple of comments in `api/index.py` and `api/requirements.txt`. 
 - After the first test, I switched it over to Haiku and instructed it not to use md styling in its responses.
-- After all the tests, I instructed it to use unorthodox spelling to imitate an Austrian accent, to enhance the effect.
+- After all the tests, I instructed it to use unorthodox spelling to imitate an Austrian accent, to enhance the effect. Also updated the welcome message to match.
 - I've also CNAME'd the app to be accessible on a subdomain I own (coach.mavi.party); but it's still hosted on Vercel.
 
 **Results:**  
