@@ -140,7 +140,7 @@ export default function ChatInterface() {
         ...prev,
         {
           role: 'assistant',
-          content: `⚠️ Couldn't reach the server. Make sure the backend is running on port 8000 and try again.\n\n(${err instanceof Error ? err.message : 'Network error'})`,
+          content: `⚠️ Couldn't reach the server. The dev has broken it either by mistake, or on purpose to frustrate users.\n\n(${err instanceof Error ? err.message : 'Network error'})`,
         },
       ])
     } finally {
