@@ -47,6 +47,8 @@ Replies are grounded in public-domain psychoanalytic texts (Freud trans. Eder/Br
 - **Offline/online split.** Embeddings are precomputed and committed (`api/_index/embeddings.npy` float16 row-normalized + `chunks.json`); the runtime embeds only the query — never load model weights into the function, never add a vector DB at this corpus size (pgvector is the known later upgrade path).
 - **Graceful degradation.** Missing index or failed embedding call → ungrounded chat, never a 500.
 - **Persona survives grounding.** Retrieved passages are appended to the system prompt under `GROUNDING_PREAMBLE`, which re-asserts the 1–3 sentence limit and forbids mentioning sources.
+- **Corpus pruning.** Per-book `start`/`end` regex markers in `BOOKS` cut title pages, TOCs, translator boilerplate, and indices before chunking; substantive prose (author prefaces, Hinkle's analytical introduction) stays. Pruning lives in the script — never hand-edit the committed source texts, they must stay byte-identical to a fresh fetch.
+- **Rate limits.** Embedding requests are token-budgeted (≤25K est. tokens each) and paced via `TPM_LIMIT` (40K, the OpenAI free tier) with retry-on-429; raise `TPM_LIMIT` on paid tiers.
 - Rebuild: `OPENAI_API_KEY=... uv run python scripts/build_index.py` (idempotent; `--chunks-only` skips the embedding step).
 
 ### Established Color System
