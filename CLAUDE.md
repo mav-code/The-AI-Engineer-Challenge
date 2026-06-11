@@ -33,10 +33,21 @@ This is a psychoanalyst-themed chat interface. The persona is a stern, sinister 
 | Layer | Technology | Location |
 |---|---|---|
 | Frontend | Next.js 14 + TypeScript + Tailwind CSS | `frontend/` |
-| Backend | FastAPI + OpenAI (`gpt-5`) | `api/` |
+| Backend | FastAPI + Anthropic (`claude-haiku-4-5-20251001`, OpenAI swappable via comment toggle) | `api/` |
+| Retrieval | numpy cosine over precomputed OpenAI `text-embedding-3-small` vectors | `api/_index/`, `scripts/build_index.py` |
 | Deploy | Vercel monorepo | `vercel.json` |
 
-`vercel.json` routes `/api/*` to the Python serverless backend and everything else to the Next.js app.
+`vercel.json` routes `/api/*` to the Python serverless backend and everything else to the Next.js app. The `includeFiles` config on the Python build bundles `api/_index/**` into the serverless function.
+
+### Retrieval Layer
+
+Replies are grounded in public-domain psychoanalytic texts (Freud trans. Eder/Brill/Hall, Jung trans. Hinkle — NEVER the Strachey Standard Edition, which is still copyrighted). Invariants:
+
+- **Same embedding model on both sides.** The corpus (`scripts/build_index.py`) and the runtime query (`api/index.py`) must use the same model; both files carry paired `EMBEDDING PROVIDER` comment-toggles (OpenAI default, Voyage alternative). The runtime asserts dimension equality.
+- **Offline/online split.** Embeddings are precomputed and committed (`api/_index/embeddings.npy` float16 row-normalized + `chunks.json`); the runtime embeds only the query — never load model weights into the function, never add a vector DB at this corpus size (pgvector is the known later upgrade path).
+- **Graceful degradation.** Missing index or failed embedding call → ungrounded chat, never a 500.
+- **Persona survives grounding.** Retrieved passages are appended to the system prompt under `GROUNDING_PREAMBLE`, which re-asserts the 1–3 sentence limit and forbids mentioning sources.
+- Rebuild: `OPENAI_API_KEY=... uv run python scripts/build_index.py` (idempotent; `--chunks-only` skips the embedding step).
 
 ### Established Color System
 

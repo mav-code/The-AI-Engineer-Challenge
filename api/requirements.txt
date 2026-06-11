@@ -1,4 +1,7 @@
 fastapi
 anthropic
-# openai
+openai
+# ^ needed at runtime for query embeddings even when chatting via Anthropic.
+# voyageai
+numpy
 python-dotenv

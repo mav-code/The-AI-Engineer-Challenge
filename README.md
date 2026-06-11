@@ -10,13 +10,44 @@
 
 > For additional context on LLM development environments and API key setup, you can also check out our [Interactive Dev Environment for LLM Development](https://github.com/AI-Maker-Space/Interactive-Dev-Environment-for-AI-Engineers).
 
-**The Analyst** is an LLM-powered chat application featuring a stern, sinister continental psychoanalyst who is deeply skeptical of your mental health. Built with a Next.js 14 frontend, a FastAPI + OpenAI backend, and deployed on Vercel as a monorepo.
+**The Analyst** is an LLM-powered chat application featuring a stern, sinister continental psychoanalyst who is deeply skeptical of your mental health. Built with a Next.js 14 frontend, a FastAPI + Claude backend grounded in real psychoanalytic source texts via retrieval, and deployed on Vercel as a monorepo.
 
 > *"Sit. Do not touch anything. You are here because something is… wrong."*
 
 The repo walks through building and shipping this kind of application from scratch. Follow the steps below!
 
 Are you ready? The Analyst is waiting. Let's get started!
+
+## 📚 Retrieval: The Analyst Has Actually Read Freud
+
+The Analyst no longer improvises its theory. Every reply is grounded in real psychoanalytic source texts via a tiny hand-rolled RAG layer — no vector database, no LangChain, just numpy and ~2,000 chunks of public-domain Freud and Jung.
+
+### How it works
+
+1. **Corpus (offline, committed).** `scripts/build_index.py` fetches four public-domain texts from Project Gutenberg into `data/texts/` — Freud's *Dream Psychology* (Eder), *Three Contributions to the Theory of Sex* (Brill), *A General Introduction to Psychoanalysis* (Hall), and Jung's *Psychology of the Unconscious* (Hinkle). All pre-1929 translations; the Strachey *Standard Edition* is still under copyright, so it stays out.
+2. **Chunk + embed (offline, committed).** Texts are split by paragraph and packed into ~300–500-token windows with one paragraph of overlap. Each chunk is embedded with OpenAI `text-embedding-3-small` and written to `api/_index/embeddings.npy` (float16, row-normalized) plus `api/_index/chunks.json` (chunk text + source metadata).
+3. **Retrieve (runtime).** Each request embeds *only the latest user message* (one API call — the serverless function never loads model weights), takes the top-4 chunks by cosine similarity (numpy `argpartition` over a flat matrix — sub-millisecond at this corpus size), and injects them into the system prompt as grounding. The persona and the 1–3 sentence format rules stay fully intact. If the index is missing or the embedding call fails, the chat degrades gracefully to ungrounded mode instead of erroring.
+
+### Rebuilding the index
+
+```bash
+export OPENAI_API_KEY=sk-...
+uv run python scripts/build_index.py
+```
+
+Idempotent: already-downloaded texts are reused, and the index is rewritten from scratch. Pass `--chunks-only` to run fetch + chunk without embedding (no key needed).
+
+### Swapping the embedding provider
+
+Same comment-toggle pattern as the chat provider: flip the paired `EMBEDDING PROVIDER` blocks in `scripts/build_index.py` **and** `api/index.py`, swap `openai` for `voyageai` in `api/requirements.txt` and `pyproject.toml`, then rebuild the index. Corpus and query must use the same embedding model — the runtime asserts the dimensions match and refuses to compare apples to oranges (or Freud to mismatched vector spaces).
+
+### Environment variables
+
+| Variable | Needed where | Purpose |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Vercel + local shell | Chat completions (the Analyst's voice) |
+| `OPENAI_API_KEY` | Vercel + local shell | Query embeddings at runtime; corpus embeddings at build time |
+| `VOYAGE_API_KEY` | Only if you switch to Voyage | Embeddings, both sides |
 
 <details>
   <summary>🖥️ Accessing "gpt-4.1-mini" (ChatGPT) like a developer</summary>
@@ -371,6 +402,7 @@ Then rerun your vibe check and document:
 - Implemented sending the chat history as an array to the backend, so that the conversation can build and be self-referential. The Analyst now has a memory.
 - Added "Checking" and "Offline" indicators to go with the "Online" one. App pings the backend for status on mount
 - I've also CNAME'd the app to be accessible on a subdomain I own (coach.mavi.party); but it's still hosted on Vercel.
+- Next, I'm going to try and figure out a RAG pattern and shove some old public-domain psychoanalysis in there .
 
 **Results:**  
 - Haiku is laconic, which fits the use-case better than the essay responses.
