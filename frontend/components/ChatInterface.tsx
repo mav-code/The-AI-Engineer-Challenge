@@ -81,6 +81,32 @@ function Avatar({ src, alt, className }: { src: string; alt: string; className: 
   )
 }
 
+// Receipts for the disclaimer: documented dangers of AI "therapy" and the
+// AI-psychosis spiral. Favicons come from Google's s2 service — the same
+// external-CDN pattern as the Twemoji avatars.
+const FURTHER_READING = [
+  {
+    title: 'Exploring the Dangers of AI in Mental Health Care',
+    domain: 'hai.stanford.edu',
+    url: 'https://hai.stanford.edu/news/exploring-the-dangers-of-ai-in-mental-health-care',
+  },
+  {
+    title: 'These Logs of ChatGPT Allegedly Driving a Suicidal Woman to Her Death Are Deeply Disturbing',
+    domain: 'futurism.com',
+    url: 'https://futurism.com/artificial-intelligence/logs-chatgpt-suicidal-woman-death',
+  },
+  {
+    title: 'Generative AI Chatbots and Delusions: From Guesswork to Emerging Cases',
+    domain: 'onlinelibrary.wiley.com',
+    url: 'https://onlinelibrary.wiley.com/doi/10.1111/acps.70022',
+  },
+  {
+    title: 'Chatbot psychosis',
+    domain: 'en.wikipedia.org',
+    url: 'https://en.wikipedia.org/wiki/Chatbot_psychosis',
+  },
+]
+
 // The one place the app deliberately breaks character. The footer disclaimer
 // opens this; it says, in plain earnest language, why none of this should be
 // taken seriously — including the psychological risk of treating it as real.
@@ -107,59 +133,59 @@ function DisclaimerModal({ onClose }: { onClose: () => void }) {
       >
         <div className="flex items-start justify-between gap-4 mb-3">
           <h2 className="font-bold text-gray-900 text-base">
-            Please don&apos;t take any of this seriously. Really.
+            It's just for fun folks
           </h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="flex-none w-7 h-7 rounded-full border border-black bg-[#F9D074] hover:bg-[#EDA551] text-gray-900 font-bold leading-none"
+            className="flex-none w-7 h-7 rounded-full text-gray-900 font-bold leading-none"
           >
             ×
           </button>
         </div>
 
         <p className="mb-3">
-          <strong>What this is:</strong> a parody chatbot and a small engineering
-          exercise. The &ldquo;Analyst&rdquo; is a large language model that has been
-          instructed to play a cartoon of a early-20th-century psychoanalyst. You're
+          This is Claude with public-domain Freud and Jung 
+          <a href="https://en.wikipedia.org/wiki/Retrieval-augmented_generation">shoved down its throat</a>,
+          told to speak in a funny Austrian accent and maybe be vaguely menacing, and shackled so as not to cost me too much money.
+           I made this to learn about the Anthropic API, basically, and other AI fundamentals of the current moment.
         </p>
 
         <p className="mb-3">
-          <strong>What it is not:</strong> it is not therapy, not a therapist, and not
-          a screening tool. It has no clinical training, no duty of care, no judgment,
-          no memory of you beyond this browser, and no ability to help in a crisis. It
-          cannot tell when it is wrong, and it is often wrong.
+          This is not therapy, or analysis, or anything. Do not use it to try and fix your life. You will drive yourself crazy. 
+          Just because I told it not to be outwardly sycophantic doesn't mean it doesn't have all the same stuff going on under 
+          the hood.
         </p>
 
         <p className="mb-3">
-          <strong>How it actually works:</strong> a text generator predicts plausible
-          next words, steered by a prompt that demands confident, pathologizing
-          replies, with passages retrieved from Freud and Jung texts that are a
-          century old. Psychoanalysis of that era is historically fascinating and
-          scientifically contested-to-superseded; here it is set dressing. When the
-          Analyst &ldquo;diagnoses&rdquo; you, it is producing genre fiction about you.
-          It is built to sound insightful. Sounding insightful is not being right.
+          I mean it's genre fiction basically. It's genre fiction you can get lost in and think you're doing therapy in. 
+          That is dangerous for your psyche. It's like a holodeck and a cult in one.
         </p>
 
-        <p className="mb-3">
-          <strong>The spiral risk — read this part:</strong> extended, emotionally
-          loaded conversations with chatbots can pull people into loops that feel
-          profound and self-confirming — sometimes called &ldquo;AI psychosis&rdquo;
-          in reporting. Language models mirror your framing back at you with fluent
-          confidence; with an authority-figure persona on top, that feedback loop can
-          make arbitrary statements feel like revealed truth about yourself. This app
-          knowingly plays with exactly that dynamic, which is why this notice exists.
-          If sessions here start to feel <em>real</em> — if the Analyst seems to
-          &ldquo;know&rdquo; you, or you catch yourself making decisions based on what
-          it said — close the tab. That is not insight; that is the trick working too
-          well, on the wrong target.
-        </p>
+        {/* Receipts, as link pills: step 3 on the cream panel (step 4),
+            darkening to step 2 on hover like the send button. */}
+        <ul className="flex flex-wrap gap-2 mb-3">
+          {FURTHER_READING.map((link) => (
+            <li key={link.url} className="max-w-full">
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-black bg-[#F9D074] hover:bg-[#EDA551] px-3 py-1.5 text-xs text-gray-900 transition-colors"
+              >
+                <img
+                  src={`https://www.google.com/s2/favicons?domain=${link.domain}&sz=32`}
+                  alt=""
+                  className="w-4 h-4 flex-none"
+                />
+                <span>{link.title}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
 
         <p className="mb-1">
-          <strong>If you are actually struggling:</strong> talk to a human — a friend,
-          a doctor, a licensed therapist. In the US you can call or text{' '}
-          <strong>988</strong> (Suicide &amp; Crisis Lifeline); most countries have an
-          equivalent. A chatbot with a monocle is not on that list.
+          That's serious stuff! Don't do that!
         </p>
       </div>
     </div>
@@ -512,7 +538,7 @@ export default function ChatInterface() {
               className="underline decoration-dotted hover:text-gray-800 transition-colors"
             >
               This is not a real attempt at mental health care, let alone a replacement
-              for professional health care. (Tap to read why — seriously.)
+              for professional health care.
             </button>
             {(messages.length > 1 || sessionCount > 1) && (
               <>
