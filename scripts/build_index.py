@@ -83,6 +83,41 @@ BOOKS = [
         "start": r"When Professor Freud of Vienna made his early discoveries",  # Hinkle's intro
         "end": r"^\s*INDEX\s*$",
     },
+    {
+        "file": "freud_psychopathology.txt",
+        "url": "https://www.gutenberg.org/cache/epub/67332/pg67332.txt",
+        "source": "Freud, Psychopathology of Everyday Life (trans. Brill)",
+        "start": r"During the year 1898 I published a short essay",  # Chapter I
+        "end": r"^INDEX\s*$",
+    },
+    {
+        "file": "freud_wit.txt",
+        "url": "https://www.gutenberg.org/cache/epub/75915/pg75915.txt",
+        "source": "Freud, Wit and Its Relation to the Unconscious (trans. Brill)",
+        "start": r"Whoever has had occasion to examine that part of the literature",  # Introduction
+        "end": r"^\s*INDEX\s*$",
+    },
+    {
+        "file": "freud_leonardo.txt",
+        "url": "https://www.gutenberg.org/cache/epub/34300/pg34300.txt",
+        "source": "Freud, Leonardo da Vinci (trans. Brill)",
+        "start": r"When psychoanalytic investigation, which usually contents itself",  # Chapter I
+        "end": None,  # footnotes are substantive; book then runs into the license
+    },
+    {
+        "file": "freud_war_and_death.txt",
+        "url": "https://www.gutenberg.org/cache/epub/35875/pg35875.txt",
+        "source": "Freud, Reflections on War and Death (trans. Brill & Kuttner)",
+        "start": r"Caught in the whirlwind of these war times",  # Part I
+        "end": r"^End of Project Gutenberg",  # legacy end-line sits inside the text body
+    },
+    {
+        "file": "jung_collected_papers.txt",
+        "url": "https://www.gutenberg.org/cache/epub/48225/pg48225.txt",
+        "source": "Jung, Collected Papers on Analytical Psychology (ed. Long)",
+        "start": r"In that wide field of psychopathic deficiency",  # first paper
+        "end": r"^INDEX\s*$",
+    },
 ]
 
 # Window sizing. Token counts are estimated as words / 0.75 (the usual

@@ -403,6 +403,8 @@ Then rerun your vibe check and document:
 - Added "Checking" and "Offline" indicators to go with the "Online" one. App pings the backend for status on mount
 - I've also CNAME'd the app to be accessible on a subdomain I own (coach.mavi.party); but it's still hosted on Vercel.
 - I've added four classic works of early psychoanalysis, and I'm going to try and embed them using OpenAI's `text-embedding-3-small`. Then I can say I know the RAG pattern.
+- I'm instructing Claude to follow TDD patterns from now on, as the project grows in scope.
+- Adding query context, a similarity floor, rate limiting, session ending, the Analyst's notes, and a patient file in localStorage, 
 
 **Results:**  
 - Haiku is laconic, which fits the use-case better than the essay responses.

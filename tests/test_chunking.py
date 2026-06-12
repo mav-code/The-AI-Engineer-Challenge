@@ -39,6 +39,26 @@ EXPECTED_BOUNDS = {
         "When Professor Freud of Vienna made his early discoveries",
         "“The Myth of the Birth of the Hero.”)",
     ),
+    "freud_psychopathology.txt": (
+        "During the year 1898 I published a short essay",
+        "not robbed of all capacity to express itself_.",
+    ),
+    "freud_wit.txt": (
+        "Whoever has had occasion to examine that part of the literature",
+        "did not need humor to make us happy.",
+    ),
+    "freud_leonardo.txt": (
+        "When psychoanalytic investigation, which usually contents itself",
+        "M. Herzfeld, l. c. p. II.",
+    ),
+    "freud_war_and_death.txt": (
+        "Caught in the whirlwind of these war times",
+        "[5] See Totem and Taboo, Chapter III.",
+    ),
+    "jung_collected_papers.txt": (
+        "In that wide field of psychopathic deficiency",
+        "tendency of the psychological process at any given moment.",
+    ),
 }
 
 
