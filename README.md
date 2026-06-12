@@ -404,13 +404,14 @@ Then rerun your vibe check and document:
 - I've also CNAME'd the app to be accessible on a subdomain I own (coach.mavi.party); but it's still hosted on Vercel.
 - I've added nine classic public-domain works of early psychoanalysis (see `api/_index`), and I'm going to try and embed them using OpenAI's `text-embedding-3-small`. Then I can say I know the RAG pattern.
 - I'm instructing Claude to follow TDD patterns from now on, as the project grows in scope.
-- Adding query context, a similarity floor, rate limiting, session ending, the Analyst's notes at a new endpoint (`api/notes`), and a patient file in localStorage.
+- Adding query context, a similarity floor, rate limiting, session ending, a new endpoint for the Analyst's notes (`api/notes`) and one for API health (`api/health`), and a patient file in localStorage.
 
 **Results:**  
 - Haiku is laconic, which fits the use-case better than the essay responses.
 - The styling-nixing instructions improved the conversational effect, and are preferable even to properly rendering markdown.
 - The Austrian accent is funny.
 - Works great on my own domain
+- I've confirmed, via `api_health` and Vercel logging, that our corpus is in production. But so far it's not clear that it's having any sort of effect. Maybe I'll have to dig deep, give it some dream-meat or something to chew on.
 
 ---
 

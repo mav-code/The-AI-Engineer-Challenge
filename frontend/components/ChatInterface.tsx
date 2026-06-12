@@ -91,9 +91,9 @@ const FURTHER_READING = [
     url: 'https://hai.stanford.edu/news/exploring-the-dangers-of-ai-in-mental-health-care',
   },
   {
-    title: 'These Logs of ChatGPT Allegedly Driving a Suicidal Woman to Her Death Are Deeply Disturbing',
+    title: 'Man Who Had Managed Mental Illness Effectively for Years Says ChatGPT Sent Him Into Hospitalization for Psychosis',
     domain: 'futurism.com',
-    url: 'https://futurism.com/artificial-intelligence/logs-chatgpt-suicidal-woman-death',
+    url: 'https://futurism.com/artificial-intelligence/mental-illness-chatgpt-psychosis-lawsuit',
   },
   {
     title: 'Generative AI Chatbots and Delusions: From Guesswork to Emerging Cases',
@@ -146,7 +146,7 @@ function DisclaimerModal({ onClose }: { onClose: () => void }) {
 
         <p className="mb-3">
           This is Claude with public-domain Freud and Jung 
-          <a href="https://en.wikipedia.org/wiki/Retrieval-augmented_generation">shoved down its throat</a>,
+          <a href="https://en.wikipedia.org/wiki/Retrieval-augmented_generation"> shoved down its throat</a>,
           told to speak in a funny Austrian accent and maybe be vaguely menacing, and shackled so as not to cost me too much money.
            I made this to learn about the Anthropic API, basically, and other AI fundamentals of the current moment.
         </p>
@@ -159,7 +159,7 @@ function DisclaimerModal({ onClose }: { onClose: () => void }) {
 
         <p className="mb-3">
           I mean it's genre fiction basically. It's genre fiction you can get lost in and think you're doing therapy in. 
-          That is dangerous for your psyche. It's like a holodeck and a cult in one.
+          That can be dangerous for your psyche. It's like a holodeck and a cult in one.
         </p>
 
         {/* Receipts, as link pills: step 3 on the cream panel (step 4),
@@ -410,7 +410,7 @@ export default function ChatInterface() {
           />
           <div className="min-w-0">
             <h1 className="text-gray-900 font-bold text-lg leading-none">The Analyst</h1>
-            <p className="text-gray-900 text-xs mt-0.5 opacity-60">Your problems are worse than you think.</p>
+            <p className="text-gray-900 text-xs mt-0.5 opacity-60">Come in, my dear boy.</p>
           </div>
           <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
             <span className={`w-2 h-2 rounded-full ${
