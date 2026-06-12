@@ -1,10 +1,19 @@
 'use client'
 
 import { useState, useRef, useEffect, KeyboardEvent, ReactNode } from 'react'
-import { SESSION_LIMIT, isLockedOut, nextMidnight, userTurnCount } from '../lib/session'
+import {
+  SESSION_LIMIT,
+  greeting,
+  isLockedOut,
+  nextMidnight,
+  parseDossier,
+  userTurnCount,
+} from '../lib/session'
 
-// localStorage key for the overnight lockout (ms timestamp of next midnight).
+// localStorage keys: the overnight lockout (ms timestamp of next midnight)
+// and the dossier (conversation, session number, case notes).
 const LOCKOUT_KEY = 'analyst.lockedUntil'
+const DOSSIER_KEY = 'analyst.dossier'
 
 // Converts *word* spans to <em> — the only markdown the model is instructed to emit.
 function renderContent(text: string): ReactNode[] {
@@ -20,11 +29,9 @@ interface Message {
   content: string
 }
 
-const WELCOME: Message = {
-  role: 'assistant',
-  content:
-    "Ah. You haff come.\n\nZis vas not a coincidence, you know. Ze mind does not make accidents. Sit down und tell me everyzing. I am listening.",
-}
+// The opening line is owned by lib/session.ts (greeting(1)) so first-visit
+// and returning-patient greetings live side by side.
+const WELCOME: Message = { role: 'assistant', content: greeting(1) }
 
 /*
  * Four-step palette — every touching pair of surfaces is exactly ±1 step.
@@ -109,9 +116,13 @@ export default function ChatInterface() {
   const [notes, setNotes] = useState<string | null>(null)
   const [notesLoading, setNotesLoading] = useState(false)
   const [notesError, setNotesError] = useState(false)
+  // 1-based number of the current session (grows when a concluded patient returns).
+  const [sessionCount, setSessionCount] = useState(1)
   const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking')
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  // Blocks the persistence effect until hydration has read storage first.
+  const hydrated = useRef(false)
 
   // Sending is blocked while a reply is in flight OR still being "spoken".
   const busy = loading || typedUpTo !== null
@@ -122,12 +133,55 @@ export default function ChatInterface() {
       .catch(() => setStatus('offline'))
   }, [])
 
-  // The office keeps hours: a concluded session locks the couch until the
-  // next local midnight. Trivially circumventable via devtools — by design.
+  // Hydrate the dossier. Three cases:
+  //  - mid-session transcript -> restore it as-is
+  //  - concluded session, office still closed -> restore read-only (lockout)
+  //  - concluded session, office reopened -> NEW session, returning greeting
+  // The lockout is trivially circumventable via devtools — by design.
   useEffect(() => {
     const stored = localStorage.getItem(LOCKOUT_KEY)
-    if (isLockedOut(stored ? Number(stored) : null, new Date())) setEnded(true)
+    const locked = isLockedOut(stored ? Number(stored) : null, new Date())
+    const dossier = parseDossier(localStorage.getItem(DOSSIER_KEY))
+
+    if (dossier.messages.length > 0) {
+      if (dossier.ended && !locked) {
+        const nextSession = dossier.sessionCount + 1
+        setSessionCount(nextSession)
+        setMessages([{ role: 'assistant', content: greeting(nextSession) }])
+      } else {
+        setSessionCount(dossier.sessionCount)
+        setMessages(dossier.messages as Message[])
+        setEnded(dossier.ended || locked)
+        setNotes(dossier.notes)
+      }
+    } else if (locked) {
+      setEnded(true)
+    }
+    hydrated.current = true
   }, [])
+
+  // Persist the dossier on every change (after hydration, so the stored
+  // file is never clobbered by the initial render's default state).
+  useEffect(() => {
+    if (!hydrated.current) return
+    localStorage.setItem(
+      DOSSIER_KEY,
+      JSON.stringify({ messages, ended, notes, sessionCount })
+    )
+  }, [messages, ended, notes, sessionCount])
+
+  // The shredder. In-character data deletion: dossier, lockout, everything.
+  function burnFile() {
+    if (!window.confirm('Destroy ze file? Zere is no recovery.')) return
+    localStorage.removeItem(DOSSIER_KEY)
+    localStorage.removeItem(LOCKOUT_KEY)
+    setMessages([WELCOME])
+    setEnded(false)
+    setNotes(null)
+    setNotesError(false)
+    setSessionCount(1)
+    setTypedUpTo(null)
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -368,6 +422,17 @@ export default function ChatInterface() {
           )}
           <p className="text-center text-gray-500 text-xs mt-2">
             This is not a real attempt at mental health care, let alone a replacement for professional health care.
+            {(messages.length > 1 || sessionCount > 1) && (
+              <>
+                {' · '}
+                <button
+                  onClick={burnFile}
+                  className="underline decoration-dotted hover:text-gray-800 transition-colors"
+                >
+                  burn my file 🔥
+                </button>
+              </>
+            )}
           </p>
         </footer>
 
