@@ -1,6 +1,10 @@
 'use client'
 
 import { useState, useRef, useEffect, KeyboardEvent, ReactNode } from 'react'
+import { SESSION_LIMIT, isLockedOut, nextMidnight, userTurnCount } from '../lib/session'
+
+// localStorage key for the overnight lockout (ms timestamp of next midnight).
+const LOCKOUT_KEY = 'analyst.lockedUntil'
 
 // Converts *word* spans to <em> — the only markdown the model is instructed to emit.
 function renderContent(text: string): ReactNode[] {
@@ -99,6 +103,8 @@ export default function ChatInterface() {
   const [loading, setLoading] = useState(false)
   // Chars of the LAST message revealed so far; null = no animation running.
   const [typedUpTo, setTypedUpTo] = useState<number | null>(null)
+  // The session is over (turn limit reached now, or lockout found on mount).
+  const [ended, setEnded] = useState(false)
   const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking')
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -110,6 +116,13 @@ export default function ChatInterface() {
     fetch('/api/health')
       .then(r => setStatus(r.ok ? 'online' : 'offline'))
       .catch(() => setStatus('offline'))
+  }, [])
+
+  // The office keeps hours: a concluded session locks the couch until the
+  // next local midnight. Trivially circumventable via devtools — by design.
+  useEffect(() => {
+    const stored = localStorage.getItem(LOCKOUT_KEY)
+    if (isLockedOut(stored ? Number(stored) : null, new Date())) setEnded(true)
   }, [])
 
   useEffect(() => {
@@ -137,7 +150,10 @@ export default function ChatInterface() {
 
   async function send() {
     const text = input.trim()
-    if (!text || busy) return
+    if (!text || busy || ended) return
+
+    // Is this exchange the session's last? (counting the message being sent)
+    const final = userTurnCount(messages) + 1 >= SESSION_LIMIT
 
     setInput('')
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
@@ -150,6 +166,7 @@ export default function ChatInterface() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [...messages, { role: 'user', content: text }],
+          final,
         }),
       })
 
@@ -164,6 +181,10 @@ export default function ChatInterface() {
       await new Promise((r) => setTimeout(r, PAUSE_MIN_MS + Math.random() * PAUSE_RANGE_MS))
       setMessages((prev) => [...prev, { role: 'assistant', content: reply }])
       setTypedUpTo(0)
+      if (final) {
+        setEnded(true)
+        localStorage.setItem(LOCKOUT_KEY, String(nextMidnight(new Date())))
+      }
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -264,9 +285,13 @@ export default function ChatInterface() {
                 growTextarea()
               }}
               onKeyDown={handleKey}
-              placeholder="Share what's on your mind… (Enter to send, Shift+Enter for a new line)"
+              placeholder={
+                ended
+                  ? 'Ze session is over. Ze office reopens tomorrow.'
+                  : "Share what's on your mind… (Enter to send, Shift+Enter for a new line)"
+              }
               rows={1}
-              disabled={busy}
+              disabled={busy || ended}
               className="flex-1 resize-none rounded-xl border border-black bg-[#F8F0E4] text-gray-800 placeholder-gray-500 text-sm leading-relaxed px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#E2C3DA] focus:border-[#E2C3DA] disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
               style={{ maxHeight: 160 }}
             />
@@ -274,13 +299,18 @@ export default function ChatInterface() {
                 Hover darkens to step 2 (#EDA551) — still adjacent. */}
             <button
               onClick={send}
-              disabled={!input.trim() || busy}
+              disabled={!input.trim() || busy || ended}
               aria-label="Send message"
               className="flex-none w-10 h-10 rounded-xl bg-[#F9D074] text-gray-900 border border-black hover:bg-[#EDA551] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 flex items-center justify-center text-lg font-bold"
             >
               ↑
             </button>
           </div>
+          {ended && (
+            <p className="text-center text-gray-700 text-xs mt-2 font-medium">
+              Session concluded. Ze office reopens tomorrow.
+            </p>
+          )}
           <p className="text-center text-gray-500 text-xs mt-2">
             This is not a real attempt at mental health care, let alone a replacement for professional health care.
           </p>

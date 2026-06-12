@@ -184,6 +184,17 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: list[Message]
+    # Set by the frontend on the session's last exchange (turn limit reached);
+    # optional, so older clients and curl examples keep working unchanged.
+    final: bool = False
+
+
+# Appended to the system prompt for the closing exchange of a session.
+FINAL_SESSION_INSTRUCTION = (
+    "\n\nZis is the end of the session: after addressing the patient's last "
+    "message, deliver a final clinical pronouncement and firmly dismiss them "
+    "until tomorrow. Do not invite further discussion."
+)
 
 
 @app.get("/")
@@ -213,6 +224,8 @@ def chat(request: ChatRequest, raw_request: Request):
     try:
         # Ground the reply in the latest exchange (the retrieval key).
         system_prompt = _grounded_system_prompt(_retrieval_query(messages))
+        if request.final:
+            system_prompt += FINAL_SESSION_INSTRUCTION
 
         # ── PROVIDER BLOCK (chat) ── comment in the block matching your import ─
 

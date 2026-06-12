@@ -62,3 +62,18 @@ def test_chat_missing_key_is_clean_500(client, app_module, monkeypatch):
 
 def test_chat_rejects_malformed_body(client):
     assert client.post("/api/chat", json={"nope": True}).status_code == 422
+
+
+def test_chat_final_flag_appends_closing_instruction(client, fake_anthropic):
+    body = {
+        "messages": [{"role": "user", "content": "I see. So that is it?"}],
+        "final": True,
+    }
+    assert client.post("/api/chat", json=body).status_code == 200
+    assert "end of the session" in fake_anthropic["system"].lower()
+
+
+def test_chat_without_final_flag_is_unchanged(client, fake_anthropic):
+    body = {"messages": [{"role": "user", "content": "hello"}]}
+    assert client.post("/api/chat", json=body).status_code == 200
+    assert "end of the session" not in fake_anthropic["system"].lower()
