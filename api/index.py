@@ -93,10 +93,31 @@ def _embed_query(text: str) -> np.ndarray:
     return vector
 
 
+# Passages scoring below this cosine similarity are noise, not grounding —
+# an off-topic question ("how do I fix my DNS?") should retrieve nothing
+# rather than four irrelevant pages of libido theory. Tuned by eye for
+# text-embedding-3-small; log scores temporarily if re-tuning.
+MIN_SIMILARITY = 0.30
+
+# Retrieval queries are capped to keep the embedding input bounded; truncation
+# drops the OLDEST text so the latest user message always survives intact.
+QUERY_MAX_CHARS = 2000
+
+
+def _retrieval_query(messages: list["Message"]) -> str:
+    """Latest user message plus the assistant reply before it, so follow-ups
+    like "what does that mean?" carry their context into retrieval."""
+    latest_user = next((m.content for m in reversed(messages) if m.role == "user"), "")
+    last_assistant = next((m.content for m in reversed(messages) if m.role == "assistant"), "")
+    query = f"{last_assistant}\n{latest_user}".strip() if last_assistant else latest_user
+    return query[-QUERY_MAX_CHARS:]
+
+
 def _retrieve(query: str, k: int = 4) -> list[dict]:
     """Top-k chunks by cosine similarity (rows are pre-normalized, so a
-    normalized-query dot product IS cosine similarity). Returns [] on any
-    failure so a retrieval hiccup never takes down the chat itself."""
+    normalized-query dot product IS cosine similarity), filtered by
+    MIN_SIMILARITY. Returns [] on any failure so a retrieval hiccup never
+    takes down the chat itself."""
     if _EMBEDDINGS is None or not query.strip():
         return []
     try:
@@ -105,7 +126,7 @@ def _retrieve(query: str, k: int = 4) -> list[dict]:
         scores = _EMBEDDINGS @ vector
         top = np.argpartition(scores, -k)[-k:]
         top = top[np.argsort(scores[top])[::-1]]
-        return [_CHUNKS[i] for i in top]
+        return [_CHUNKS[i] for i in top if scores[i] >= MIN_SIMILARITY]
     except Exception as exc:  # noqa: BLE001 — degrade to ungrounded, don't 500
         print(f"retrieval failed, continuing ungrounded: {exc}")
         return []
@@ -142,11 +163,8 @@ def health():
 @app.post("/api/chat")
 def chat(request: ChatRequest):
     try:
-        # Ground the reply in the latest user message (the retrieval key).
-        latest_user = next(
-            (m.content for m in reversed(request.messages) if m.role == "user"), ""
-        )
-        system_prompt = _grounded_system_prompt(latest_user)
+        # Ground the reply in the latest exchange (the retrieval key).
+        system_prompt = _grounded_system_prompt(_retrieval_query(request.messages))
 
         # ── PROVIDER BLOCK (chat) ── comment in the block matching your import ─
 
