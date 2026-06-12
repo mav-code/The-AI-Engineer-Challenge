@@ -48,6 +48,14 @@ const USER_SVG    = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/s
 // fill the circle exactly; the monocle chain and sweat bead escape via overflow-visible.
 const EMOJI_SCALE = '109%'
 
+// The Analyst does not rush. Each reply sits behind a deliberate pause, then
+// is "spoken" character by character. This is a pure client-side effect —
+// the API response is already complete, so it costs no extra tokens.
+const PAUSE_MIN_MS = 800        // shortest pre-reply silence
+const PAUSE_RANGE_MS = 2200     // random extra silence on top (0–2.2s)
+const TYPE_TICK_MS = 24         // ms between typewriter ticks
+const TYPE_CHARS_PER_TICK = 3   // ≈125 chars/sec reveal speed
+
 function Avatar({ src, alt, className }: { src: string; alt: string; className: string }) {
   return (
     <div className={className}>
@@ -89,9 +97,14 @@ export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([WELCOME])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  // Chars of the LAST message revealed so far; null = no animation running.
+  const [typedUpTo, setTypedUpTo] = useState<number | null>(null)
   const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking')
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Sending is blocked while a reply is in flight OR still being "spoken".
+  const busy = loading || typedUpTo !== null
 
   useEffect(() => {
     fetch('/api/health')
@@ -101,7 +114,19 @@ export default function ChatInterface() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, loading])
+  }, [messages, loading, typedUpTo])
+
+  // Typewriter: reveal the last message a few characters per tick.
+  useEffect(() => {
+    if (typedUpTo === null) return
+    const full = messages[messages.length - 1]?.content ?? ''
+    if (typedUpTo >= full.length) {
+      setTypedUpTo(null)
+      return
+    }
+    const timer = setTimeout(() => setTypedUpTo(typedUpTo + TYPE_CHARS_PER_TICK), TYPE_TICK_MS)
+    return () => clearTimeout(timer)
+  }, [typedUpTo, messages])
 
   function growTextarea() {
     const el = textareaRef.current
@@ -112,7 +137,7 @@ export default function ChatInterface() {
 
   async function send() {
     const text = input.trim()
-    if (!text || loading) return
+    if (!text || busy) return
 
     setInput('')
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
@@ -134,7 +159,11 @@ export default function ChatInterface() {
       }
 
       const { reply } = await res.json()
+      // A deliberate, slightly unsettling pause before the Analyst speaks
+      // (the typing indicator stays visible throughout).
+      await new Promise((r) => setTimeout(r, PAUSE_MIN_MS + Math.random() * PAUSE_RANGE_MS))
       setMessages((prev) => [...prev, { role: 'assistant', content: reply }])
+      setTypedUpTo(0)
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -210,7 +239,11 @@ export default function ChatInterface() {
                 }`}
                 style={{ wordBreak: 'break-word' }}
               >
-                {renderContent(msg.content)}
+                {renderContent(
+                  typedUpTo !== null && i === messages.length - 1
+                    ? msg.content.slice(0, typedUpTo)
+                    : msg.content
+                )}
               </div>
             </div>
           ))}
@@ -233,7 +266,7 @@ export default function ChatInterface() {
               onKeyDown={handleKey}
               placeholder="Share what's on your mind… (Enter to send, Shift+Enter for a new line)"
               rows={1}
-              disabled={loading}
+              disabled={busy}
               className="flex-1 resize-none rounded-xl border border-black bg-[#F8F0E4] text-gray-800 placeholder-gray-500 text-sm leading-relaxed px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#E2C3DA] focus:border-[#E2C3DA] disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
               style={{ maxHeight: 160 }}
             />
@@ -241,7 +274,7 @@ export default function ChatInterface() {
                 Hover darkens to step 2 (#EDA551) — still adjacent. */}
             <button
               onClick={send}
-              disabled={!input.trim() || loading}
+              disabled={!input.trim() || busy}
               aria-label="Send message"
               className="flex-none w-10 h-10 rounded-xl bg-[#F9D074] text-gray-900 border border-black hover:bg-[#EDA551] active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 flex items-center justify-center text-lg font-bold"
             >
