@@ -81,6 +81,93 @@ function Avatar({ src, alt, className }: { src: string; alt: string; className: 
   )
 }
 
+// The one place the app deliberately breaks character. The footer disclaimer
+// opens this; it says, in plain earnest language, why none of this should be
+// taken seriously — including the psychological risk of treating it as real.
+function DisclaimerModal({ onClose }: { onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: globalThis.KeyboardEvent) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  return (
+    // Dim scrim over the app; the panel itself is step 4 cream with the
+    // standard black border, like every other surface in the card.
+    <div
+      className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="What this app is, and is not"
+        onClick={(e) => e.stopPropagation()}
+        className="bg-[#F8F0E4] border-2 border-black rounded-2xl max-w-xl w-full max-h-[85vh] overflow-y-auto px-6 py-5 text-sm leading-relaxed text-gray-800"
+      >
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <h2 className="font-bold text-gray-900 text-base">
+            Please don&apos;t take any of this seriously. Really.
+          </h2>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="flex-none w-7 h-7 rounded-full border border-black bg-[#F9D074] hover:bg-[#EDA551] text-gray-900 font-bold leading-none"
+          >
+            ×
+          </button>
+        </div>
+
+        <p className="mb-3">
+          <strong>What this is:</strong> a parody chatbot and a small engineering
+          exercise. The &ldquo;Analyst&rdquo; is a large language model that has been
+          instructed to play a cartoon of a early-20th-century psychoanalyst — cold,
+          certain, and faintly menacing — because that was funny to build. It is a
+          bit. It is not, in any sense, care.
+        </p>
+
+        <p className="mb-3">
+          <strong>What it is not:</strong> it is not therapy, not a therapist, and not
+          a screening tool. It has no clinical training, no duty of care, no judgment,
+          no memory of you beyond this browser, and no ability to help in a crisis. It
+          cannot tell when it is wrong, and it is often wrong.
+        </p>
+
+        <p className="mb-3">
+          <strong>How it actually works:</strong> a text generator predicts plausible
+          next words, steered by a prompt that demands confident, pathologizing
+          replies, with passages retrieved from Freud and Jung texts that are a
+          century old. Psychoanalysis of that era is historically fascinating and
+          scientifically contested-to-superseded; here it is set dressing. When the
+          Analyst &ldquo;diagnoses&rdquo; you, it is producing genre fiction about you.
+          It is built to sound insightful. Sounding insightful is not being right.
+        </p>
+
+        <p className="mb-3">
+          <strong>The spiral risk — read this part:</strong> extended, emotionally
+          loaded conversations with chatbots can pull people into loops that feel
+          profound and self-confirming — sometimes called &ldquo;AI psychosis&rdquo;
+          in reporting. Language models mirror your framing back at you with fluent
+          confidence; with an authority-figure persona on top, that feedback loop can
+          make arbitrary statements feel like revealed truth about yourself. This app
+          knowingly plays with exactly that dynamic, which is why this notice exists.
+          If sessions here start to feel <em>real</em> — if the Analyst seems to
+          &ldquo;know&rdquo; you, or you catch yourself making decisions based on what
+          it said — close the tab. That is not insight; that is the trick working too
+          well, on the wrong target.
+        </p>
+
+        <p className="mb-1">
+          <strong>If you are actually struggling:</strong> talk to a human — a friend,
+          a doctor, a licensed therapist. In the US you can call or text{' '}
+          <strong>988</strong> (Suicide &amp; Crisis Lifeline); most countries have an
+          equivalent. A chatbot with a monocle is not on that list.
+        </p>
+      </div>
+    </div>
+  )
+}
+
 function TypingIndicator() {
   return (
     <div className="flex items-end gap-2">
@@ -119,6 +206,7 @@ export default function ChatInterface() {
   // 1-based number of the current session (grows when a concluded patient returns).
   const [sessionCount, setSessionCount] = useState(1)
   const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking')
+  const [showDisclaimer, setShowDisclaimer] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   // Blocks the persistence effect until hydration has read storage first.
@@ -421,7 +509,13 @@ export default function ChatInterface() {
             </p>
           )}
           <p className="text-center text-gray-500 text-xs mt-2">
-            This is not a real attempt at mental health care, let alone a replacement for professional health care.
+            <button
+              onClick={() => setShowDisclaimer(true)}
+              className="underline decoration-dotted hover:text-gray-800 transition-colors"
+            >
+              This is not a real attempt at mental health care, let alone a replacement
+              for professional health care. (Tap to read why — seriously.)
+            </button>
             {(messages.length > 1 || sessionCount > 1) && (
               <>
                 {' · '}
@@ -437,6 +531,8 @@ export default function ChatInterface() {
         </footer>
 
       </div>
+
+      {showDisclaimer && <DisclaimerModal onClose={() => setShowDisclaimer(false)} />}
     </div>
   )
 }
