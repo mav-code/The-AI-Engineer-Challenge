@@ -4,6 +4,7 @@
 - You must always try and write code that is well documented. (self or commented is fine)
 - You must only work on a single feature at a time.
 - You must explain your decisions thoroughly to the user.
+- You must follow TDD patterns when reasonable.
 
 ### Rules for Frontend
 
