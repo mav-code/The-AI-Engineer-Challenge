@@ -121,9 +121,7 @@ function DisclaimerModal({ onClose }: { onClose: () => void }) {
         <p className="mb-3">
           <strong>What this is:</strong> a parody chatbot and a small engineering
           exercise. The &ldquo;Analyst&rdquo; is a large language model that has been
-          instructed to play a cartoon of a early-20th-century psychoanalyst — cold,
-          certain, and faintly menacing — because that was funny to build. It is a
-          bit. It is not, in any sense, care.
+          instructed to play a cartoon of a early-20th-century psychoanalyst. You're
         </p>
 
         <p className="mb-3">

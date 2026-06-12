@@ -17,6 +17,7 @@
 - The Vercel docs are at https://vercel.com/docs. Review them as necessary.
 - Always provide users with a way to run the created UI once you have created it.
 - The project's color scheme is a four-step warm palette. Every pair of touching surfaces must be exactly ±1 step apart. Do not break this adjacency rule.
+- Any copy that you write is a placeholder. Keep it brief and surface it to the user.
 
 ### README.md Rules
 
