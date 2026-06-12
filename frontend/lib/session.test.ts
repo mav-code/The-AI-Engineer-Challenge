@@ -100,3 +100,12 @@ describe('parseDossier', () => {
     expect(d).toEqual(original)
   })
 })
+
+import { CLOSING_LINE } from './session'
+
+describe('CLOSING_LINE', () => {
+  it('acknowledges that the session is over, in persona', () => {
+    expect(CLOSING_LINE.toLowerCase()).toContain('our time is up')
+    expect(CLOSING_LINE).toMatch(/[Zz]e /) // the accent survives
+  })
+})

@@ -73,3 +73,9 @@ export function greeting(sessionCount: number): string {
   const variant = RETURNING_GREETINGS[(sessionCount - 2) % RETURNING_GREETINGS.length]
   return variant.replace('%N%', String(sessionCount))
 }
+
+// Canned ritual delivered after the final exchange's reply — the model's own
+// closing varies, but the session always ends on this fixed, clock-watching
+// dismissal so the cutoff never feels abrupt.
+export const CLOSING_LINE =
+  '*glances at ze clock* Our time is up. Go home. Sleep. Und if you dream — write it down. Ze office reopens tomorrow.'

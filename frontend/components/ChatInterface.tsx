@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, KeyboardEvent, ReactNode } from 'react'
 import {
+  CLOSING_LINE,
   SESSION_LIMIT,
   greeting,
   isLockedOut,
@@ -223,6 +224,9 @@ export default function ChatInterface() {
   const [typedUpTo, setTypedUpTo] = useState<number | null>(null)
   // The session is over (turn limit reached now, or lockout found on mount).
   const [ended, setEnded] = useState(false)
+  // True while the final reply is typing: when it finishes, the canned
+  // "our time is up" line follows so the cutoff never feels abrupt.
+  const [closingQueued, setClosingQueued] = useState(false)
   // The case notes the Analyst "accidentally" leaves out after a session.
   const [notes, setNotes] = useState<string | null>(null)
   const [notesLoading, setNotesLoading] = useState(false)
@@ -289,6 +293,7 @@ export default function ChatInterface() {
     localStorage.removeItem(LOCKOUT_KEY)
     setMessages([WELCOME])
     setEnded(false)
+    setClosingQueued(false)
     setNotes(null)
     setNotesError(false)
     setSessionCount(1)
@@ -296,20 +301,32 @@ export default function ChatInterface() {
   }
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Instant scroll during typewriter ticks: this effect fires ~40x/sec
+    // while typing, and restarting a SMOOTH scroll on every tick floods the
+    // browser's animation queue (devtools open turns that into molasses).
+    // Smooth is reserved for real message appends.
+    bottomRef.current?.scrollIntoView({ behavior: typedUpTo !== null ? 'auto' : 'smooth' })
   }, [messages, loading, typedUpTo])
 
-  // Typewriter: reveal the last message a few characters per tick.
+  // Typewriter: reveal the last message a few characters per tick. When the
+  // finished message was the session's last reply, the canned closing line
+  // follows (and types out in turn).
   useEffect(() => {
     if (typedUpTo === null) return
     const full = messages[messages.length - 1]?.content ?? ''
     if (typedUpTo >= full.length) {
-      setTypedUpTo(null)
+      if (closingQueued) {
+        setClosingQueued(false)
+        setMessages((prev) => [...prev, { role: 'assistant', content: CLOSING_LINE }])
+        setTypedUpTo(0)
+      } else {
+        setTypedUpTo(null)
+      }
       return
     }
     const timer = setTimeout(() => setTypedUpTo(typedUpTo + TYPE_CHARS_PER_TICK), TYPE_TICK_MS)
     return () => clearTimeout(timer)
-  }, [typedUpTo, messages])
+  }, [typedUpTo, messages, closingQueued])
 
   function growTextarea() {
     const el = textareaRef.current
@@ -352,6 +369,7 @@ export default function ChatInterface() {
       setMessages((prev) => [...prev, { role: 'assistant', content: reply }])
       setTypedUpTo(0)
       if (final) {
+        setClosingQueued(true)
         setEnded(true)
         localStorage.setItem(LOCKOUT_KEY, String(nextMidnight(new Date())))
       }
@@ -532,26 +550,26 @@ export default function ChatInterface() {
               Session concluded. Ze office reopens tomorrow.
             </p>
           )}
-          <p className="text-center text-gray-500 text-xs mt-2">
+          {/* Two unrelated utilities, visually separated so first-time
+              visitors don't parse them as one sentence: disclaimer hugs the
+              left edge, the shredder hugs the right. */}
+          <div className="flex items-baseline justify-between gap-6 mt-2 text-xs text-gray-500">
             <button
               onClick={() => setShowDisclaimer(true)}
-              className="underline decoration-dotted hover:text-gray-800 transition-colors"
+              className="text-left underline decoration-dotted hover:text-gray-800 transition-colors"
             >
               This is not a real attempt at mental health care, let alone a replacement
               for professional health care.
             </button>
             {(messages.length > 1 || sessionCount > 1) && (
-              <>
-                {' · '}
-                <button
-                  onClick={burnFile}
-                  className="underline decoration-dotted hover:text-gray-800 transition-colors"
-                >
-                  burn my file 🔥
-                </button>
-              </>
+              <button
+                onClick={burnFile}
+                className="flex-none underline decoration-dotted hover:text-gray-800 transition-colors"
+              >
+                burn my file 🔥
+              </button>
             )}
-          </p>
+          </div>
         </footer>
 
       </div>
