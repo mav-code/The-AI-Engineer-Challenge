@@ -405,6 +405,7 @@ Then rerun your vibe check and document:
 - I've added nine classic public-domain works of early psychoanalysis (see `api/_index`), and I'm going to try and embed them using OpenAI's `text-embedding-3-small`. Then I can say I know the RAG pattern.
 - I'm instructing Claude to follow TDD patterns from now on, as the project grows in scope.
 - Adding query context, a similarity floor, rate limiting, session ending, a new endpoint for the Analyst's notes (`api/notes`) and one for API health (`api/health`), and a patient file in localStorage.
+- I've significantly expanded the disclaimer because frankly the project is legitimately dangerous.
 
 **Results:**  
 - Haiku is laconic, which fits the use-case better than the essay responses.
@@ -412,6 +413,8 @@ Then rerun your vibe check and document:
 - The Austrian accent is funny.
 - Works great on my own domain
 - I've confirmed, via `api_health` and Vercel logging, that our corpus is in production. But so far it's not clear that it's having any sort of effect. Maybe I'll have to dig deep, give it some dream-meat or something to chew on.
+- The case notes feature is genuinely really cool imo
+- The session end as first implemented was dissonant within its own narrative. I'm adding an exit message.
 
 ---
 
