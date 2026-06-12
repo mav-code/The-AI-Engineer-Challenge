@@ -402,7 +402,7 @@ Then rerun your vibe check and document:
 - Implemented sending the chat history as an array to the backend, so that the conversation can build and be self-referential. The Analyst now has a memory.
 - Added "Checking" and "Offline" indicators to go with the "Online" one. App pings the backend for status on mount
 - I've also CNAME'd the app to be accessible on a subdomain I own (coach.mavi.party); but it's still hosted on Vercel.
-- Next, I'm going to try and figure out a RAG pattern and shove some old public-domain psychoanalysis in there .
+- I've added four classic works of early psychoanalysis, and I'm going to try and embed them using OpenAI's `text-embedding-3-small`. Then I can say I know the RAG pattern.
 
 **Results:**  
 - Haiku is laconic, which fits the use-case better than the essay responses.
