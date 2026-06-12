@@ -1,10 +1,12 @@
 import json
 import os
+import time
+from collections import deque
 from pathlib import Path
 
 import numpy as np
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -141,6 +143,40 @@ def _grounded_system_prompt(query: str) -> str:
 # ──────────────────────────────────────────────────────────────────────────────
 
 
+# ── Cost guards ───────────────────────────────────────────────────────────────
+# Conversation history is the only unbounded token cost in the app, and this
+# is a public endpoint spending real credit. Limits are sized so a human
+# conversing in good faith never hits them.
+HISTORY_MAX_MESSAGES = 20   # only the most recent messages reach the model
+MESSAGE_MAX_CHARS = 2000    # per-message cap (silently truncated)
+RATE_LIMIT_PER_MINUTE = 15  # per IP — defeats scripts, invisible to humans
+
+# Per-IP request timestamps. Module state is per serverless instance, so this
+# is best-effort rather than airtight — fine for a POC; instances are
+# short-lived enough that the dict never grows meaningfully.
+_RATE_BUCKETS: dict[str, deque] = {}
+
+
+def _client_ip(raw_request: Request) -> str:
+    forwarded = raw_request.headers.get("x-forwarded-for")  # set by Vercel
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return raw_request.client.host if raw_request.client else "unknown"
+
+
+def _rate_limited(ip: str) -> bool:
+    """Sliding 60-second window per IP."""
+    now = time.time()
+    bucket = _RATE_BUCKETS.setdefault(ip, deque())
+    while bucket and now - bucket[0] > 60:
+        bucket.popleft()
+    if len(bucket) >= RATE_LIMIT_PER_MINUTE:
+        return True
+    bucket.append(now)
+    return False
+# ──────────────────────────────────────────────────────────────────────────────
+
+
 class Message(BaseModel):
     role: str
     content: str
@@ -161,10 +197,22 @@ def health():
 
 
 @app.post("/api/chat")
-def chat(request: ChatRequest):
+def chat(request: ChatRequest, raw_request: Request):
+    if _rate_limited(_client_ip(raw_request)):
+        raise HTTPException(
+            status_code=429,
+            detail="Enough. Ve are not having a crisis. Breathe, und try again in a minute.",
+        )
+
+    # Trim history and cap message sizes BEFORE anything touches a paid API.
+    messages = [
+        Message(role=m.role, content=m.content[:MESSAGE_MAX_CHARS])
+        for m in request.messages[-HISTORY_MAX_MESSAGES:]
+    ]
+
     try:
         # Ground the reply in the latest exchange (the retrieval key).
-        system_prompt = _grounded_system_prompt(_retrieval_query(request.messages))
+        system_prompt = _grounded_system_prompt(_retrieval_query(messages))
 
         # ── PROVIDER BLOCK (chat) ── comment in the block matching your import ─
 
@@ -177,7 +225,7 @@ def chat(request: ChatRequest):
             model="claude-haiku-4-5-20251001",
             max_tokens=256,
             system=system_prompt,
-            messages=[{"role": m.role, "content": m.content} for m in request.messages],
+            messages=[{"role": m.role, "content": m.content} for m in messages],
         )
         reply = response.content[0].text
 
@@ -190,7 +238,7 @@ def chat(request: ChatRequest):
         #     model="gpt-5",
         #     messages=[
         #         {"role": "system", "content": system_prompt},
-        #         *[{"role": m.role, "content": m.content} for m in request.messages],
+        #         *[{"role": m.role, "content": m.content} for m in messages],
         #     ],
         # )
         # reply = response.choices[0].message.content
