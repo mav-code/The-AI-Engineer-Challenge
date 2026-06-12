@@ -54,6 +54,16 @@ Send the conversation history, receive the analyst's reply. The latest user mess
 { "reply": "Anxious. Yes. That is... expected. Tell me more about your mother." }
 ```
 
+The body also accepts an optional `"final": true` flag — the frontend sends it on a session's twelfth user turn, and the system prompt gains a closing instruction so the Analyst delivers a final pronouncement and dismisses the patient.
+
+### `POST /api/notes`
+
+The Analyst's private case file on a concluded session. Send the same `messages` shape; receive `{ "notes": "Case notes — …" }`. No retrieval, capped at 400 output tokens; the frontend gates it behind session end so it costs at most one extra call per session.
+
+### Guards (both POST endpoints)
+
+History is trimmed server-side to the last 20 messages, each message is capped at 2,000 characters, and requests are limited to 15/minute per IP (HTTP 429 with a politely menacing detail message).
+
 ### `GET /api/health`
 ```json
 { "status": "ok" }

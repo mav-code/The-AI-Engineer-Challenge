@@ -24,9 +24,9 @@ The Analyst no longer improvises its theory. Every reply is grounded in real psy
 
 ### How it works
 
-1. **Corpus (offline, committed).** `scripts/build_index.py` fetches four public-domain texts from Project Gutenberg into `data/texts/` — Freud's *Dream Psychology* (Eder), *Three Contributions to the Theory of Sex* (Brill), *A General Introduction to Psychoanalysis* (Hall), and Jung's *Psychology of the Unconscious* (Hinkle). All pre-1929 translations; the Strachey *Standard Edition* is still under copyright, so it stays out.
+1. **Corpus (offline, committed).** `scripts/build_index.py` fetches nine public-domain texts from Project Gutenberg into `data/texts/` — seven Freud (*Dream Psychology*, *Three Contributions to the Theory of Sex*, *A General Introduction to Psychoanalysis*, *Psychopathology of Everyday Life*, *Wit and Its Relation to the Unconscious*, *Leonardo da Vinci*, *Reflections on War and Death*) and two Jung (*Psychology of the Unconscious*, *Collected Papers on Analytical Psychology*), all in pre-1929 translations (Eder, Brill, Hall, Hinkle, Kuttner, Long). The Strachey *Standard Edition* is still under copyright, so it stays out; Reich and Fromm have no public-domain English translations at all.
 2. **Chunk + embed (offline, committed).** Front and back matter — title pages, TOCs, translator boilerplate, indices — is pruned via per-book markers in `BOOKS` (substantive prose like author prefaces stays in). What remains is split by paragraph and packed into ~300–500-token windows with one paragraph of overlap. Each chunk is embedded with OpenAI `text-embedding-3-small` — in token-budgeted batches paced to respect the free-tier 40K tokens-per-minute limit (raise `TPM_LIMIT` in the script if your account allows; the full build takes ~18 min at the free-tier pace) — and written to `api/_index/embeddings.npy` (float16, row-normalized) plus `api/_index/chunks.json` (chunk text + source metadata).
-3. **Retrieve (runtime).** Each request embeds *only the latest user message* (one API call — the serverless function never loads model weights), takes the top-4 chunks by cosine similarity (numpy `argpartition` over a flat matrix — sub-millisecond at this corpus size), and injects them into the system prompt as grounding. The persona and the 1–3 sentence format rules stay fully intact. If the index is missing or the embedding call fails, the chat degrades gracefully to ungrounded mode instead of erroring.
+3. **Retrieve (runtime).** Each request embeds one query — the latest user message plus the assistant reply before it, so follow-ups like "what does *that* mean?" carry their context (one API call; the serverless function never loads model weights). Top-4 chunks by cosine similarity (numpy `argpartition` over a flat matrix — sub-millisecond at this corpus size), filtered by a similarity floor so off-topic questions retrieve nothing instead of noise, then injected into the system prompt as grounding. The persona and the 1–3 sentence format rules stay fully intact. If the index is missing or the embedding call fails, the chat degrades gracefully to ungrounded mode instead of erroring.
 
 ### Rebuilding the index
 
@@ -402,9 +402,9 @@ Then rerun your vibe check and document:
 - Implemented sending the chat history as an array to the backend, so that the conversation can build and be self-referential. The Analyst now has a memory.
 - Added "Checking" and "Offline" indicators to go with the "Online" one. App pings the backend for status on mount
 - I've also CNAME'd the app to be accessible on a subdomain I own (coach.mavi.party); but it's still hosted on Vercel.
-- I've added four classic works of early psychoanalysis, and I'm going to try and embed them using OpenAI's `text-embedding-3-small`. Then I can say I know the RAG pattern.
+- I've added four classic works of early psychoanalysis (see `api/_index`), and I'm going to try and embed them using OpenAI's `text-embedding-3-small`. Then I can say I know the RAG pattern.
 - I'm instructing Claude to follow TDD patterns from now on, as the project grows in scope.
-- Adding query context, a similarity floor, rate limiting, session ending, the Analyst's notes, and a patient file in localStorage, 
+- Adding query context, a similarity floor, rate limiting, session ending, the Analyst's notes at a new endpoint (`api/notes`), and a patient file in localStorage.
 
 **Results:**  
 - Haiku is laconic, which fits the use-case better than the essay responses.
