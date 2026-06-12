@@ -36,7 +36,7 @@ def fake_anthropic(app_module, monkeypatch):
 def test_health(client):
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    assert response.json()["status"] == "ok"
 
 
 def test_chat_round_trip(client, fake_anthropic):
@@ -77,3 +77,12 @@ def test_chat_without_final_flag_is_unchanged(client, fake_anthropic):
     body = {"messages": [{"role": "user", "content": "hello"}]}
     assert client.post("/api/chat", json=body).status_code == 200
     assert "end of the session" not in fake_anthropic["system"].lower()
+
+
+def test_health_reports_corpus_size(client, app_module):
+    # Lets production confirm at a glance that the index was bundled and
+    # loaded: 0 means the serverless function is running ungrounded.
+    body = client.get("/api/health").json()
+    assert body["status"] == "ok"
+    assert body["corpus_chunks"] == len(app_module._CHUNKS)
+    assert body["corpus_chunks"] > 0  # the committed index must load locally

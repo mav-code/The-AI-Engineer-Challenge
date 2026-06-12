@@ -128,7 +128,14 @@ def _retrieve(query: str, k: int = 4) -> list[dict]:
         scores = _EMBEDDINGS @ vector
         top = np.argpartition(scores, -k)[-k:]
         top = top[np.argsort(scores[top])[::-1]]
-        return [_CHUNKS[i] for i in top if scores[i] >= MIN_SIMILARITY]
+        kept = [i for i in top if scores[i] >= MIN_SIMILARITY]
+        # Audit line — visible in the Vercel function logs, the only place
+        # retrieval can be observed in production (prompts are never exposed).
+        print(
+            f"retrieval: kept {len(kept)}/{k} passages, "
+            f"top score {scores[top[0]]:.2f}, floor {MIN_SIMILARITY}"
+        )
+        return [_CHUNKS[i] for i in kept]
     except Exception as exc:  # noqa: BLE001 — degrade to ungrounded, don't 500
         print(f"retrieval failed, continuing ungrounded: {exc}")
         return []
@@ -226,7 +233,9 @@ def root():
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok"}
+    # corpus_chunks doubles as a deployment check: 0 means the index wasn't
+    # bundled (or failed to load) and the Analyst is improvising ungrounded.
+    return {"status": "ok", "corpus_chunks": len(_CHUNKS)}
 
 
 @app.post("/api/chat")

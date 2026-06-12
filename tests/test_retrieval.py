@@ -66,3 +66,14 @@ def test_committed_index_is_consistent(app_module):
     assert app_module._EMBEDDINGS.shape[0] == len(app_module._CHUNKS)
     norms = np.linalg.norm(app_module._EMBEDDINGS[:32], axis=1)
     assert np.allclose(norms, 1.0, atol=0.01), "index rows must be pre-normalized"
+
+
+def test_retrieval_logs_an_audit_line(app_module, fake_index, monkeypatch, capsys):
+    # One line per request in the serverless logs is the only way to see
+    # retrieval working in production (the prompt is never exposed).
+    matrix, _ = fake_index
+    monkeypatch.setattr(app_module, "_embed_query", lambda text: matrix[2] * 3)
+    app_module._retrieve("anything")
+    out = capsys.readouterr().out
+    assert "retrieval:" in out
+    assert "top score" in out
