@@ -197,6 +197,28 @@ FINAL_SESSION_INSTRUCTION = (
 )
 
 
+# ── Case notes (/api/notes) ───────────────────────────────────────────────────
+# A different task wearing the same persona: the Analyst's private case file
+# on a concluded session. Bigger token budget than chat (these are notes, not
+# a 1-3 sentence reply), but still hard-capped.
+NOTES_MAX_TOKENS = 400
+
+NOTES_SYSTEM_PROMPT = (
+    "You are a stern, exacting continental psychoanalyst. The session "
+    "transcribed below has concluded. Write your private case notes on the "
+    "patient: presenting complaint, observations, a tentative diagnosis in "
+    "your own idiom, and a grim prognosis. These notes are to yourself — "
+    "address no one. Stay fully in persona, including the unorthodox spelling "
+    "imitating an Austrian accent. Plain prose only; no markdown except "
+    "*asterisks* to italicize a word. At most 150 words. "
+    "Begin with: Case notes —"
+)
+
+# The transcript ends on an assistant turn; requests must not (an
+# assistant-final message is a prefill, which newer models reject).
+NOTES_TRIGGER = "(Ze session has ended. Write your case notes now.)"
+
+
 @app.get("/")
 def root():
     return {"status": "ok"}
@@ -259,6 +281,41 @@ def chat(request: ChatRequest, raw_request: Request):
         # ───────────────────────────────────────────────────────────────────────
 
         return {"reply": reply}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error calling API: {str(e)}")
+
+
+@app.post("/api/notes")
+def notes(request: ChatRequest, raw_request: Request):
+    """The Analyst's case file on a concluded session. Shares the chat
+    endpoint's rate bucket and history guards; skips retrieval entirely
+    (the notes summarize the conversation — grounding adds nothing)."""
+    if _rate_limited(_client_ip(raw_request)):
+        raise HTTPException(
+            status_code=429,
+            detail="Ze file cabinet is locked. Try again in a minute.",
+        )
+
+    transcript = [
+        {"role": m.role, "content": m.content[:MESSAGE_MAX_CHARS]}
+        for m in request.messages[-HISTORY_MAX_MESSAGES:]
+    ]
+    transcript.append({"role": "user", "content": NOTES_TRIGGER})
+
+    try:
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured")
+        client = anthropic.Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=NOTES_MAX_TOKENS,
+            system=NOTES_SYSTEM_PROMPT,
+            messages=transcript,
+        )
+        return {"notes": response.content[0].text}
     except HTTPException:
         raise
     except Exception as e:

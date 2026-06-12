@@ -105,6 +105,10 @@ export default function ChatInterface() {
   const [typedUpTo, setTypedUpTo] = useState<number | null>(null)
   // The session is over (turn limit reached now, or lockout found on mount).
   const [ended, setEnded] = useState(false)
+  // The case notes the Analyst "accidentally" leaves out after a session.
+  const [notes, setNotes] = useState<string | null>(null)
+  const [notesLoading, setNotesLoading] = useState(false)
+  const [notesError, setNotesError] = useState(false)
   const [status, setStatus] = useState<'checking' | 'online' | 'offline'>('checking')
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -198,6 +202,26 @@ export default function ChatInterface() {
     }
   }
 
+  async function fetchNotes() {
+    if (notesLoading || notes) return
+    setNotesLoading(true)
+    setNotesError(false)
+    try {
+      const res = await fetch('/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const body = await res.json()
+      setNotes(body.notes)
+    } catch {
+      setNotesError(true)
+    } finally {
+      setNotesLoading(false)
+    }
+  }
+
   function handleKey(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -270,6 +294,37 @@ export default function ChatInterface() {
           ))}
 
           {loading && <TypingIndicator />}
+
+          {/* After the session ends, the Analyst "accidentally" leaves his
+              case notes within reach. Deliberately subtle — a reward for the
+              curious, not a feature announcement. */}
+          {ended && !busy && messages.length > 1 && !notes && (
+            <button
+              onClick={fetchNotes}
+              disabled={notesLoading}
+              className="block mx-auto text-xs italic text-gray-700 opacity-40 hover:opacity-90 transition-opacity duration-300 disabled:opacity-60"
+            >
+              {notesLoading
+                ? '…deciphering ze handwriting…'
+                : notesError
+                  ? 'Ze notes are illegible. Squint again?'
+                  : '…he has left his case notes on ze desk…'}
+            </button>
+          )}
+
+          {/* The notes themselves: a loose page. Cream (step 4) on the message
+              area (step 3) — ±1 adjacency holds; mauve is the decorative accent. */}
+          {notes && (
+            <div className="max-w-[85%] mx-auto bg-[#F8F0E4] border-2 border-[#E2C3DA] rounded-sm px-5 py-4 shadow-md -rotate-1">
+              <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">
+                Private — not for ze patient
+              </p>
+              <div className="text-sm leading-relaxed text-gray-800 whitespace-pre-wrap font-serif">
+                {renderContent(notes)}
+              </div>
+            </div>
+          )}
+
           <div ref={bottomRef} />
         </main>
 
