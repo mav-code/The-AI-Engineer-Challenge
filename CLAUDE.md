@@ -5,6 +5,8 @@
 - You must only work on a single feature at a time.
 - You must explain your decisions thoroughly to the user.
 - You must follow TDD patterns when reasonable.
+- When something fails, report the actual error output — never paper over a failing test or skipped step.
+- Do not add dependencies without stating why the standard library / existing deps can't do it.
 
 ### Rules for Frontend
 
@@ -40,6 +42,24 @@ This is a psychoanalyst-themed chat interface. The persona is a stern, sinister 
 | Deploy | Vercel monorepo | `vercel.json` |
 
 `vercel.json` routes `/api/*` to the Python serverless backend and everything else to the Next.js app. The `includeFiles` config on the Python build bundles `api/_index/**` into the serverless function.
+
+### Commands
+
+All test/build commands run keyless — external clients are mocked. Keep it that way.
+
+- Backend dev server (from repo root): `uv run uvicorn api.index:app --reload` → `http://localhost:8000`
+- Frontend dev server: `npm run dev` in `frontend/` → `http://localhost:3000` (proxies `/api/*` to the backend on :8000, so run both)
+- Backend tests (from repo root): `uv run pytest -q`
+- Frontend tests: `npm test` in `frontend/`
+- Lint / build: `npm run lint` / `npm run build` in `frontend/`
+- Rebuild retrieval index (needs a key; see Retrieval Layer): `OPENAI_API_KEY=... uv run python scripts/build_index.py`
+- Deploy: push to `main` (Vercel builds from the repo)
+
+### Gotchas
+
+- Backend commands run from the repo root, not `api/` — the module path is `api.index:app` and pytest discovers `tests/` from the root.
+- Requires Python ≥3.12,<3.13 (pinned in `pyproject.toml`); use `uv`, not a system pip.
+- The frontend in dev is useless without the backend running — `/api/*` proxies to :8000 and chat requests will fail otherwise.
 
 ### Retrieval Layer
 
