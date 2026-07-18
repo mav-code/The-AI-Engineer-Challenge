@@ -1,3 +1,7 @@
+# The Analyst
+
+A psychoanalyst-themed chat interface. The persona is a stern, sinister continental psychoanalyst — clinical, cold, and slightly menacing. The user is framed as an anxious wreck seeking (perhaps unwanted) insight.
+
 ## Rules to Follow
 
 - You must always commit your changes whenever you update code.
@@ -18,7 +22,7 @@
 - This frontend will ultimately be deployed on Vercel, but it should be possible to test locally.
 - The Vercel docs are at https://vercel.com/docs. Review them as necessary.
 - Always provide users with a way to run the created UI once you have created it.
-- The project's color scheme is a four-step warm palette. Every pair of touching surfaces must be exactly ±1 step apart. Do not break this adjacency rule.
+- Colors come from the established four-step palette (see Color System below); never break its ±1 adjacency rule.
 - Any copy that you write is a placeholder. Keep it brief and surface it to the user.
 
 ### README.md Rules
@@ -26,13 +30,7 @@
 - When you create README.md's - they should be dope, and use fun and approachable language.
 - While being fun, they should remain technically accurate, focused, instructive, and concise.
 
----
-
-## Current App: "The Analyst"
-
-This is a psychoanalyst-themed chat interface. The persona is a stern, sinister continental psychoanalyst — clinical, cold, and slightly menacing. The user is framed as an anxious wreck seeking (perhaps unwanted) insight.
-
-### Architecture
+## Architecture
 
 | Layer | Technology | Location |
 |---|---|---|
@@ -43,7 +41,7 @@ This is a psychoanalyst-themed chat interface. The persona is a stern, sinister 
 
 `vercel.json` routes `/api/*` to the Python serverless backend and everything else to the Next.js app. The `includeFiles` config on the Python build bundles `api/_index/**` into the serverless function.
 
-### Commands
+## Commands
 
 All test/build commands run keyless — external clients are mocked. Keep it that way.
 
@@ -55,11 +53,15 @@ All test/build commands run keyless — external clients are mocked. Keep it tha
 - Rebuild retrieval index (needs a key; see Retrieval Layer): `OPENAI_API_KEY=... uv run python scripts/build_index.py`
 - Deploy: push to `main` (Vercel builds from the repo)
 
-### Gotchas
+## Gotchas
 
 - Backend commands run from the repo root, not `api/` — the module path is `api.index:app` and pytest discovers `tests/` from the root.
 - Requires Python ≥3.12,<3.13 (pinned in `pyproject.toml`); use `uv`, not a system pip.
 - The frontend in dev is useless without the backend running — `/api/*` proxies to :8000 and chat requests will fail otherwise.
+
+## Settled Decisions & Invariants
+
+Append-mostly decision log. Each entry states the rule *and* the why, so future sessions don't "fix" it. When a decision costs a debugging session or a design discussion, promote it here.
 
 ### Retrieval Layer
 
@@ -71,9 +73,8 @@ Replies are grounded in public-domain psychoanalytic texts (Freud trans. Eder/Br
 - **Persona survives grounding.** Retrieved passages are appended to the system prompt under `GROUNDING_PREAMBLE`, which re-asserts the 1–3 sentence limit and forbids mentioning sources.
 - **Corpus pruning.** Per-book `start`/`end` regex markers in `BOOKS` cut title pages, TOCs, translator boilerplate, and indices before chunking; substantive prose (author prefaces, Hinkle's analytical introduction) stays. Pruning lives in the script — never hand-edit the committed source texts, they must stay byte-identical to a fresh fetch.
 - **Rate limits.** Embedding requests are token-budgeted (≤25K est. tokens each) and paced via `TPM_LIMIT` (40K, the OpenAI free tier) with retry-on-429; raise `TPM_LIMIT` on paid tiers.
-- Rebuild: `OPENAI_API_KEY=... uv run python scripts/build_index.py` (idempotent; `--chunks-only` skips the embedding step).
 
-### Established Color System
+### Color System
 
 Four discrete steps — **every touching surface pair must be exactly ±1 step**:
 
