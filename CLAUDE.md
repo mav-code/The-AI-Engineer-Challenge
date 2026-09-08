@@ -53,6 +53,13 @@ All test/build commands run keyless — external clients are mocked. Keep it tha
 - Rebuild retrieval index (needs a key; see Retrieval Layer): `OPENAI_API_KEY=... uv run python scripts/build_index.py`
 - Deploy: push to `main` (Vercel builds from the repo)
 
+UI behaviour that tests can't reach (layout at a given viewport, live regions,
+reduced motion) is verified by driving the dev server with Playwright and
+intercepting `**/api/chat` with a canned `{"reply": "…"}` — keyless, like
+everything else. Playwright is a machine-level tool, deliberately not a project
+dependency; the headless-shell build isn't installed, so launch with
+`channel="chromium"`.
+
 ## Gotchas
 
 - Backend commands run from the repo root, not `api/` — the module path is `api.index:app` and pytest discovers `tests/` from the root.
@@ -73,6 +80,47 @@ Replies are grounded in public-domain psychoanalytic texts (Freud trans. Eder/Br
 - **Persona survives grounding.** Retrieved passages are appended to the system prompt under `GROUNDING_PREAMBLE`, which re-asserts the 1–3 sentence limit and forbids mentioning sources.
 - **Corpus pruning.** Per-book `start`/`end` regex markers in `BOOKS` cut title pages, TOCs, translator boilerplate, and indices before chunking; substantive prose (author prefaces, Hinkle's analytical introduction) stays. Pruning lives in the script — never hand-edit the committed source texts, they must stay byte-identical to a fresh fetch.
 - **Rate limits.** Embedding requests are token-budgeted (≤25K est. tokens each) and paced via `TPM_LIMIT` (40K, the OpenAI free tier) with retry-on-429; raise `TPM_LIMIT` on paid tiers.
+
+### Cost & Abuse Guards
+
+`/api/chat` is a public endpoint spending real credit. Three guards, sized so a
+human conversing in good faith never notices them: history trimmed to the last
+`HISTORY_MAX_MESSAGES` (20), per-message truncation at `MESSAGE_MAX_CHARS`
+(2000), and a sliding 60-second per-IP window at `RATE_LIMIT_PER_MINUTE` (15).
+All three run *before* anything touches a paid API.
+
+- **The rate limiter is best-effort by design.** `_RATE_BUCKETS` is module
+  state, so it is per serverless instance: it does not survive cold starts and
+  is not shared across concurrent instances. That is an accepted trade-off at
+  this scale, not an oversight — it defeats casual scripting, which is all it
+  is for. Do not add Redis/Upstash to "fix" it unless the traffic justifies the
+  dependency; that is the known upgrade path if it ever does.
+
+### Mobile Viewport & Safe Areas
+
+- **Never use `h-screen` for the app shell.** `100vh` is the *layout* viewport
+  on mobile: it ignores the on-screen keyboard, which pushes the footer (and
+  the send button) below the visible area. The shell uses `.app-viewport`
+  (`100dvh`, with a `100vh` line first as the pre-`dvh` fallback).
+- **`pb-safe` and `viewport-fit=cover` are coupled.** `env(safe-area-inset-*)`
+  resolves to 0 without `viewport-fit=cover` in the `viewport` export in
+  `app/layout.tsx`. Removing one silently disables the other.
+- The `min-w-0` on the textarea is defensive only. It was *not* the cause of
+  the off-screen send button: verified with Playwright from 240px to 414px,
+  with and without the class, results identical. Don't cite it as the fix.
+
+### Accessibility
+
+- **The transcript must not be a live region.** The typewriter mutates the last
+  bubble ~40×/second; `aria-live` on `<main>` (or `role="log"`, whose implicit
+  live region is the same trap) makes a screen reader read partial words
+  continuously. Announcements go through the separate `sr-only`
+  `aria-live="polite"` region, which carries only completed replies.
+- **`usePrefersReducedMotion()` exists because CSS can't reach the typewriter.**
+  The blanket `prefers-reduced-motion` block in `globals.css` handles the
+  declarative animations; the JS timer needs the value in React. Keep the
+  reduced-motion path routed through the same timer so the queued closing line
+  still fires.
 
 ### Color System
 
