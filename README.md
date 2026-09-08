@@ -143,5 +143,6 @@ and the chat provider flips the same way in `api/index.py`.
 |---|---|
 | [`frontend/README.md`](frontend/README.md) | UI internals — palette, avatar system, design constants |
 | [`api/README.md`](api/README.md) | Endpoint reference, curl examples, CORS |
-| [`CLAUDE.md`](CLAUDE.md) | Decision log — the invariants and *why*, for anyone (human or model) editing this |
+| [`CLAUDE.md`](CLAUDE.md) | Working agreement — rules, commands, gotchas, and tripwires into the ADRs |
+| [`docs/adr/`](docs/adr/README.md) | Architecture decision records — the invariants and *why*, per subsystem |
 | [`docs/vibe-check.md`](docs/vibe-check.md) | The original hands-on evaluation, and the development log that came out of it |
