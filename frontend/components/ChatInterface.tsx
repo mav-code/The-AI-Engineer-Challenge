@@ -539,12 +539,14 @@ export default function ChatInterface() {
               }
               rows={1}
               disabled={busy || ended}
-              // `min-w-0` is load-bearing: a flex item defaults to
-              // `min-width: auto`, and a <textarea> has an intrinsic width from
-              // its `cols` attribute (~20 chars). Without it the textarea
-              // refuses to shrink past that on narrow screens, the row
-              // overflows, and the send button is pushed out and clipped by the
-              // shell's `overflow-hidden`.
+              // `min-w-0` is defensive, not load-bearing. It guards the usual
+              // flex trap (items default to `min-width: auto` and refuse to
+              // shrink past their intrinsic width, overflowing the row). Tested
+              // empirically down to a 240px viewport: Chrome shrinks this
+              // textarea fine either way, so removing it changes nothing today
+              // — it is kept as cheap insurance against a future min-width or
+              // a longer non-wrapping child. It is NOT what fixed the
+              // off-screen send button; see `.app-viewport` in globals.css.
               className="flex-1 min-w-0 resize-none rounded-xl border border-black bg-[#F8F0E4] text-gray-800 placeholder-gray-500 text-sm leading-relaxed px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#E2C3DA] focus:border-[#E2C3DA] disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
               style={{ maxHeight: 160 }}
             />
