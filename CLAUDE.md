@@ -65,6 +65,10 @@ dependency; the headless-shell build isn't installed, so launch with
 - Backend commands run from the repo root, not `api/` — the module path is `api.index:app` and pytest discovers `tests/` from the root.
 - Requires Python ≥3.12,<3.13 (pinned in `pyproject.toml`); use `uv`, not a system pip.
 - The frontend in dev is useless without the backend running — `/api/*` proxies to :8000 and chat requests will fail otherwise.
+- **Never run `npm run build` while `npm run dev` is running.** They share
+  `frontend/.next`, and the production build leaves the dev server serving 500s
+  with no obvious cause. Recovery: stop dev, `rm -rf frontend/.next`, restart.
+  Symptom looks like the app suddenly lost its DOM — it hasn't.
 
 ## Settled Decisions & Invariants
 
