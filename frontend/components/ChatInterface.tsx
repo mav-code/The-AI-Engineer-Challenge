@@ -201,9 +201,29 @@ function DisclaimerModal({ onClose }: { onClose: () => void }) {
   )
 }
 
+/** Tracks the OS "reduce motion" setting.
+ *
+ *  CSS handles the declarative animations (see globals.css), but the
+ *  typewriter is a JS timer that no media query can reach, so it needs the
+ *  value in React. Starts false and reads the real value in an effect: the
+ *  server has no matchMedia, and guessing would desync hydration. */
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const sync = () => setReduced(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+  return reduced
+}
+
 function TypingIndicator() {
   return (
-    <div className="flex items-end gap-2">
+    // aria-hidden: the bouncing dots are decoration. The live region in
+    // ChatInterface announces "considering" in words instead.
+    <div className="flex items-end gap-2" aria-hidden="true">
       <Avatar
         src={ANALYST_SVG}
         alt=""
@@ -247,9 +267,21 @@ export default function ChatInterface() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   // Blocks the persistence effect until hydration has read storage first.
   const hydrated = useRef(false)
+  const reducedMotion = usePrefersReducedMotion()
 
   // Sending is blocked while a reply is in flight OR still being "spoken".
   const busy = loading || typedUpTo !== null
+
+  // What a screen reader should hear. The transcript itself is deliberately
+  // NOT a live region: the typewriter mutates the last bubble ~40x/sec, which
+  // would spam a reader with partial words. Instead we announce once — when a
+  // reply has finished revealing — plus a word while one is being composed.
+  const lastMessage = messages[messages.length - 1]
+  const announcement = loading
+    ? 'The Analyst is considering.'
+    : typedUpTo === null && lastMessage?.role === 'assistant'
+      ? lastMessage.content
+      : ''
 
   useEffect(() => {
     fetch('/api/health')
@@ -313,8 +345,10 @@ export default function ChatInterface() {
     // while typing, and restarting a SMOOTH scroll on every tick floods the
     // browser's animation queue (devtools open turns that into molasses).
     // Smooth is reserved for real message appends.
-    bottomRef.current?.scrollIntoView({ behavior: typedUpTo !== null ? 'auto' : 'smooth' })
-  }, [messages, loading, typedUpTo])
+    bottomRef.current?.scrollIntoView({
+      behavior: typedUpTo !== null || reducedMotion ? 'auto' : 'smooth',
+    })
+  }, [messages, loading, typedUpTo, reducedMotion])
 
   // Typewriter: reveal the last message a few characters per tick. When the
   // finished message was the session's last reply, the canned closing line
@@ -332,9 +366,15 @@ export default function ChatInterface() {
       }
       return
     }
-    const timer = setTimeout(() => setTypedUpTo(typedUpTo + TYPE_CHARS_PER_TICK), TYPE_TICK_MS)
+    // Reduced motion: jump straight to the full text. Still routed through the
+    // same timer so the completion branch above (and the closing line it
+    // queues) runs exactly as it does when typing normally.
+    const timer = setTimeout(
+      () => setTypedUpTo(reducedMotion ? full.length : typedUpTo + TYPE_CHARS_PER_TICK),
+      reducedMotion ? 0 : TYPE_TICK_MS,
+    )
     return () => clearTimeout(timer)
-  }, [typedUpTo, messages, closingQueued])
+  }, [typedUpTo, messages, closingQueued, reducedMotion])
 
   function growTextarea() {
     const el = textareaRef.current
@@ -439,7 +479,8 @@ export default function ChatInterface() {
             <p className="text-gray-900 text-xs mt-0.5 opacity-60">Come in, my dear boy.</p>
           </div>
           <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
-            <span className={`w-2 h-2 rounded-full ${
+            {/* Decorative: the adjacent text already states the status. */}
+            <span aria-hidden="true" className={`w-2 h-2 rounded-full ${
               status === 'online'   ? 'bg-green-600 animate-pulse' :
               status === 'offline'  ? 'bg-red-600' :
                                       'bg-gray-400 animate-pulse'
@@ -450,8 +491,17 @@ export default function ChatInterface() {
           </div>
         </header>
 
+        {/* Announcements for screen readers only. Kept outside the transcript
+            so the typewriter's partial updates never reach a reader. */}
+        <div aria-live="polite" aria-atomic="true" className="sr-only">
+          {announcement}
+        </div>
+
         {/* Step 3 — warm yellow — message area. */}
-        <main className="flex-1 overflow-y-auto px-4 py-5 space-y-4 bg-[#F9D074]">
+        <main
+          aria-label="Session transcript"
+          className="flex-1 overflow-y-auto px-4 py-5 space-y-4 bg-[#F9D074]"
+        >
           {messages.map((msg, i) => (
             <div
               key={i}

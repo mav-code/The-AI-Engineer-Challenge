@@ -20,6 +20,22 @@
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
+/* Respect the OS "reduce motion" setting. This covers the declarative work —
+   the typing indicator's bounce, the status dot's pulse, hover/scale
+   transitions. The JS typewriter can't be reached from CSS and is handled
+   separately by usePrefersReducedMotion() in ChatInterface.tsx.
+   Near-zero rather than `none` so animationend/transitionend still fire. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Hide scrollbars in all browsers; content still scrolls via keyboard/wheel. */
 textarea, main {
   scrollbar-width: none;
