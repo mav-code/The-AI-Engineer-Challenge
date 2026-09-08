@@ -1,7 +1,7 @@
 [project]
-name = "beyond-chatgpt"
+name = "the-analyst"
 version = "0.1.0"
-description = "gpt-like-a-dev"
+description = "A psychoanalyst-themed chat app: FastAPI + Claude, grounded in public-domain psychoanalytic texts."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
