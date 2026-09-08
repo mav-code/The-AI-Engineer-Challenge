@@ -582,11 +582,13 @@ export default function ChatInterface() {
                 growTextarea()
               }}
               onKeyDown={handleKey}
-              placeholder={
-                ended
-                  ? 'Ze session is over. Ze office reopens tomorrow.'
-                  : "Share what's on your mind… (Enter to send, Shift+Enter for a new line)"
-              }
+              // Kept short deliberately. The textarea is rows={1} and only
+              // grows for real input, so a placeholder that wraps gets clipped
+              // mid-sentence on narrow screens. The keyboard hint moved to
+              // `title` — it has no meaning on touch devices anyway, and the
+              // ended-state line is already spelled out in the footer below.
+              placeholder={ended ? 'Ze session is over.' : "Share what's on your mind…"}
+              title={ended ? undefined : 'Enter to send, Shift+Enter for a new line'}
               rows={1}
               disabled={busy || ended}
               // `min-w-0` is defensive, not load-bearing. It guards the usual
