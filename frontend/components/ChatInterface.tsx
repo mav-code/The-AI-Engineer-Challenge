@@ -415,7 +415,7 @@ export default function ChatInterface() {
 
   return (
     // Step 1 — deep orange — visible on either side of the card on wide screens.
-    <div className="h-screen bg-[#D45F2A] overflow-hidden flex justify-center">
+    <div className="app-viewport bg-[#D45F2A] overflow-hidden flex justify-center">
 
       <div className="w-full max-w-4xl flex flex-col border-x border-black">
 
@@ -513,7 +513,7 @@ export default function ChatInterface() {
         </main>
 
         {/* Step 4 — warm cream — one step forward from message area. */}
-        <footer className="flex-none bg-[#F8F0E4] border-t border-black px-4 pt-3 pb-4">
+        <footer className="flex-none bg-[#F8F0E4] border-t border-black px-4 pt-3 pb-safe">
           <div className="flex items-end gap-2">
             {/* Textarea: step 4 — same as footer, defined by its black border. */}
             <textarea
@@ -531,7 +531,13 @@ export default function ChatInterface() {
               }
               rows={1}
               disabled={busy || ended}
-              className="flex-1 resize-none rounded-xl border border-black bg-[#F8F0E4] text-gray-800 placeholder-gray-500 text-sm leading-relaxed px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#E2C3DA] focus:border-[#E2C3DA] disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
+              // `min-w-0` is load-bearing: a flex item defaults to
+              // `min-width: auto`, and a <textarea> has an intrinsic width from
+              // its `cols` attribute (~20 chars). Without it the textarea
+              // refuses to shrink past that on narrow screens, the row
+              // overflows, and the send button is pushed out and clipped by the
+              // shell's `overflow-hidden`.
+              className="flex-1 min-w-0 resize-none rounded-xl border border-black bg-[#F8F0E4] text-gray-800 placeholder-gray-500 text-sm leading-relaxed px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#E2C3DA] focus:border-[#E2C3DA] disabled:opacity-50 disabled:cursor-not-allowed transition-shadow"
               style={{ maxHeight: 160 }}
             />
             {/* Send button: step 3 (#F9D074) — one step back from footer (step 4).

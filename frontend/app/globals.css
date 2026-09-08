@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Full-height app shell.
+   `100vh` on mobile is the *layout* viewport: it ignores the on-screen
+   keyboard and the collapsing URL bar, so a bottom-anchored footer gets
+   pushed below the visible area the moment the keyboard opens. `100dvh`
+   tracks the dynamic viewport instead. The `vh` line stays first as the
+   fallback for browsers predating `dvh` (pre-Safari 15.4 / Chrome 108). */
+.app-viewport {
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Bottom padding that clears the iPhone home indicator when there is one,
+   and falls back to a normal 1rem when there isn't (env() resolves to 0px).
+   Requires `viewport-fit=cover` in the viewport meta — see app/layout.tsx. */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
 /* Hide scrollbars in all browsers; content still scrolls via keyboard/wheel. */
 textarea, main {
   scrollbar-width: none;
