@@ -71,6 +71,10 @@ const TYPE_CHARS_PER_TICK = 3   // ≈125 chars/sec reveal speed
 function Avatar({ src, alt, className }: { src: string; alt: string; className: string }) {
   return (
     <div className={className}>
+      {/* Deliberate <img>, not next/image: these are remote Twemoji SVGs, and
+          next/image passes SVGs through unoptimized (behind dangerouslyAllowSVG)
+          while adding a remotePatterns config — cost with no benefit. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt={alt}
@@ -174,6 +178,10 @@ function DisclaimerModal({ onClose }: { onClose: () => void }) {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-black bg-[#F9D074] hover:bg-[#EDA551] px-3 py-1.5 text-xs text-gray-900 transition-colors"
               >
+                {/* Deliberate <img>: a 16px third-party favicon endpoint.
+                    next/image would need remotePatterns for it and optimize
+                    nothing at this size. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`https://www.google.com/s2/favicons?domain=${link.domain}&sz=32`}
                   alt=""
