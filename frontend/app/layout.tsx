@@ -11,7 +11,7 @@ const siteUrl =
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
 const DESCRIPTION =
-  'A stern, sinister continental psychoanalyst who has actually read Freud. ' +
+  'A stern, sinister continental psychoanalyst. ' +
   'Every reply is grounded in public-domain psychoanalytic texts.'
 
 export const metadata: Metadata = {
