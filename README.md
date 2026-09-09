@@ -146,3 +146,16 @@ and the chat provider flips the same way in `api/index.py`.
 | [`CLAUDE.md`](CLAUDE.md) | Working agreement — rules, commands, gotchas, and tripwires into the ADRs |
 | [`docs/adr/`](docs/adr/README.md) | Architecture decision records — the invariants and *why*, per subsystem |
 | [`docs/vibe-check.md`](docs/vibe-check.md) | The original hands-on evaluation, and the development log that came out of it |
+
+---
+
+## License
+
+[MIT](LICENSE) for the work authored here. [`NOTICE`](NOTICE) records the
+provenance — this repo was forked from an unlicensed course project, so the
+grant covers what was written here and not the scaffolding it grew from — plus
+the terms on the corpus texts (public-domain translations via Project
+Gutenberg), Twemoji and Inter.
+
+It also restates the obvious: this is interactive fiction, provided as is,
+without warranty. Not therapy.

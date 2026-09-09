@@ -1,0 +1,88 @@
+The Analyst — provenance and third-party notices
+================================================
+
+Scope of the MIT grant
+----------------------
+
+The MIT License in LICENSE covers the work authored in this repository: the
+Next.js frontend, the FastAPI backend, the retrieval layer and its build
+script, the tests, and the documentation.
+
+It does not, and cannot, grant rights over the third-party material described
+below, which remains under its own terms.
+
+
+Upstream provenance
+-------------------
+
+This repository was forked from AI-Maker-Space/The-AI-Engineer-Challenge, a
+course project published for students to fork and complete.
+
+That repository carries no license file. Absent an explicit grant, its
+contents remain under the default "all rights reserved" of copyright, and no
+license to it is offered here. Forking on GitHub is permitted by GitHub's
+Terms of Service; that permission does not extend to redistribution elsewhere
+or to sublicensing, so the MIT grant above deliberately does not attempt to
+cover it.
+
+What remains from upstream is limited and structural: deployment and project
+configuration (vercel.json routing, the pyproject skeleton), the initial
+~45-line FastAPI scaffold that api/index.py was subsequently built out from,
+and the .cursor/rules files. Everything else in this repository — including
+the whole frontend, the retrieval layer, the test suite and the docs — was
+written here.
+
+
+Corpus texts
+------------
+
+data/texts/ contains nine works of Freud and Jung in pre-1929 English
+translations (Eder, Brill, Hall, Hinkle, Kuttner, Long), retrieved from
+Project Gutenberg. These translations are in the public domain in the United
+States. The Strachey Standard Edition is still under copyright and is
+deliberately excluded.
+
+Two distinct forms are stored, each handled per Project Gutenberg's terms:
+
+  - data/texts/*.txt are byte-identical to a fresh Project Gutenberg fetch and
+    retain the Project Gutenberg header and license in full, as required when
+    redistributing their edition.
+
+  - api/_index/chunks.json contains only derived excerpts of the underlying
+    public-domain text, with all Project Gutenberg references and boilerplate
+    removed by scripts/build_index.py. The Project Gutenberg trademark is not
+    used in connection with this derived data.
+
+Project Gutenberg is a registered trademark of the Project Gutenberg Literary
+Archive Foundation. This project is not affiliated with or endorsed by it.
+
+
+Fonts and artwork
+-----------------
+
+  - Twemoji (https://github.com/twitter/twemoji) — graphics licensed
+    CC-BY 4.0. Used for the chat avatars, loaded at runtime from the jsDelivr
+    CDN rather than vendored into this repository.
+
+  - Inter — SIL Open Font License 1.1. Loaded via next/font/google, which
+    self-hosts the font files in the production build output.
+
+  - frontend/app/icon.svg, apple-icon.png and opengraph-image.png are original
+    artwork created for this project and are covered by the MIT grant above.
+    They deliberately do not reuse the Twemoji artwork.
+
+
+Dependencies
+------------
+
+Runtime and build dependencies retain their own licenses and are not
+enumerated here; see pyproject.toml / uv.lock and frontend/package.json /
+package-lock.json for the authoritative lists.
+
+
+Not medical advice
+------------------
+
+This project is a work of interactive fiction. It is not therapy, not
+psychological assessment, and not a substitute for professional care. See the
+warranty disclaimer in LICENSE, which applies in full.
