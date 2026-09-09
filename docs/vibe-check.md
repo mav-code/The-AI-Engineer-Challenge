@@ -189,6 +189,7 @@ A running log of what the vibe check prompted, and what came of it.
 - I'm instructing Claude to follow TDD patterns from now on, as the project grows in scope.
 - Adding query context, a similarity floor, rate limiting, session ending, a new endpoint for the Analyst's notes (`api/notes`) and one for API health (`api/health`), and a patient file in localStorage.
 - I've significantly expanded the disclaimer because frankly the project is legitimately dangerous.
+- I am no longer tracking adjustments made in this list
 
 **Results:**  
 - Haiku is laconic, which fits the use-case better than the essay responses.

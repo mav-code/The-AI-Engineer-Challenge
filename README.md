@@ -1,26 +1,26 @@
 <h1 align="center">🧐 The Analyst</h1>
 
-<p align="center"><em>"Sit. Do not touch anything. You are here because something is… wrong."</em></p>
-
 <p align="center">
   <a href="https://coach.mavi.party"><strong>Live demo →</strong></a>
 </p>
 
-A chat application starring a stern, sinister continental psychoanalyst who is
-deeply skeptical of your mental health. Unlike most chatbots wearing a costume,
-this one has **actually read the books**: every reply is grounded in real
-passages retrieved from nine public-domain works of Freud and Jung.
+This is a largely-vibe-coded chat app made as an exercise to learn. Here's the on-page description:
+
+> This is Claude with public-domain Freud and Jung shoved down its throat, told to speak in a funny Austrian accent and maybe be vaguely menacing, and shackled so as not to cost me too much money. I made this to learn about the Anthropic API, basically, and other AI fundamentals of the current moment.
+
+It also has an Easter egg.
+
+Most of the text in this README is AI-generated as well. Generally I prefer to write my own copy, but this project is sort of an exercise in letting go.
 
 ![The Analyst](docs/screenshot.png)
 
-> ⚠️ It is not therapy, it is not advice, and it says so in the footer. It is a
-> piece of interactive fiction with a very good reading list.
+It is not therapy, it is not advice, and it says so in the footer. It is a piece of interactive fiction.
 
 ---
 
-## Run it
+## Run it yourself for some reason
 
-You need **two terminals** — a Python backend and a Next.js frontend.
+You'll need **two terminals** — a Python backend and a Next.js frontend.
 
 ```bash
 # Terminal 1 — backend (from the repo root)
